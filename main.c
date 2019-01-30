@@ -10,6 +10,7 @@
 char* switchHome(char* currentDir);
 char* buildPrefix(char* currentDir);
 void parseInput(char* instruction, char* phrase[MAX_INSTR/2]);
+void emptyPhrase(char* phrase[MAX_INSTR/2]);
 
 
 
@@ -22,12 +23,33 @@ int main() {
   strcpy(currentDir, getenv("HOME"));
 
   for(;;) {
+    memset(instruction,0,strlen(instruction));
+    emptyPhrase(phrase);
+    
     printf("%s",buildPrefix(currentDir));
 
-    fgets(instruction,MAX_INSTR,stdin);
+    // get user and input and get rid of trailing control characters
+    //    inserted by fgets also exits on Ctrl-D
+    if (fgets(instruction, sizeof instruction, stdin)==NULL){
+      exit(0);
+    }
+    size_t len = strlen(instruction);
+    if (len && (instruction[len-1] == '\n')) {
+      instruction[len-1] = '\0';
+    }
+
     parseInput(instruction, phrase);
 
-    if (strcmp(phrase[0],"exit")) exit(0);
+    // exit on "exit"
+    if(strcmp(instruction,"exit")==0) {
+      exit(0);
+    }
+
+    int counter=0;
+    while(phrase[counter]!=NULL) {
+      printf("[%s]\n", phrase[counter++]);
+    }
+    
   }
 }
 
@@ -63,16 +85,65 @@ char* buildPrefix(char* currentDir) {
 /* Separate the users instruction into an array of actionable
  * components.
  * Places item into an array of components passed to main 
+ * Also allows for characters to be inserted in the middle of
+ * tokens and for them still to be parsed correctly
  */
 void parseInput(char* instruction, char* phrase[MAX_INSTR/2]) {
-  int counter=0;
-  char delim[] = " ";
-  char *ptr = strtok(instruction, delim);
+  int itemNo=-1, connectedLettNo=0;
+  char delim[] = " ", specialChar[] = "|><&;";
+  char* occurance,* splitPoint = strtok(instruction, delim);
+  char connectedWord[MAX_INSTR/2], strChr[2];
+
+  // strChr allow each conversion of char to string
+  strChr[1]='\0';
   
-  while (ptr != NULL) {
-    phrase[counter]=malloc(100);
-    strcpy (phrase[counter], ptr);
-    ptr = strtok(NULL, delim);
-    counter++;
+  while (splitPoint != NULL) {
+    for (int i=0; i<strlen(specialChar); ) {
+      occurance = strchr(splitPoint, specialChar[0]);
+      if (occurance!=NULL) {
+        for (int j=0; j<(occurance-splitPoint); j++) {
+          connectedWord[connectedLettNo++]=splitPoint[j];
+        }
+        
+        // Get rid of everything upto (and incl.) the special character
+        splitPoint = splitPoint + (occurance-splitPoint+1);
+        
+        // Add the phrase before the spec. char. to the phrase if there is one
+        if (connectedLettNo!=0) { 
+          connectedWord[connectedLettNo]='\0';
+          phrase[++itemNo]=malloc(100);
+          strcpy (phrase[itemNo], connectedWord);
+        }
+        
+        // Add the special character to the phrase
+        phrase[++itemNo]=malloc(100);
+        strChr[0]=specialChar[i];
+        strcpy (phrase[itemNo], strChr);
+          
+        // Make this zero so we can have another word
+        connectedLettNo=0;
+      } else {
+        i++;
+      }
+      if (i >= strlen(specialChar)) {
+        // If the item doesn't contain a special character then add to phrase
+        if (splitPoint[0]!='\0'){
+          phrase[++itemNo]=malloc(100);
+          strcpy (phrase[itemNo], splitPoint);
+        }
+      }
+    }
+    splitPoint = strtok(NULL, delim);
+  }
+  
+}
+
+/* Fuction that empties the phrase variable for the 
+ * next phrase
+ */
+void emptyPhrase(char* phrase[MAX_INSTR/2]) {
+  int counter=0;
+  while (phrase[counter]!=NULL) {
+    phrase[counter++]=NULL;
   }
 }
