@@ -3,25 +3,31 @@
 #include <string.h>
 
 /* Definitions */
-#define PATHSIZE 200
-#define MAX_INSTR 512
+#define PATHSIZE 200      // Maximum number of chars in currentDir
+#define MAX_INSTR 512     // Maximum number of chars per phrase
 
 /* Prototypes */
 char* switchHome(char* currentDir);
 char* buildPrefix(char* currentDir);
-void parseInput(char* instruction);
+void parseInput(char* instruction, char* phrase[MAX_INSTR/2]);
+
+
+
 int main() {
-  char currentPath[PATHSIZE];
-  char instruction[MAX_INSTR];
-  
-  strcpy(currentPath, getenv("HOME"));
-  strcat(currentPath,"/Documents");
+  char currentDir[PATHSIZE]; // Current Directory the user in in
+  char instruction[MAX_INSTR]; // Pre-parsed instruction
+  char *phrase[MAX_INSTR/2]; // Array of components of the instruction
+
+  // Use the default home directory as the default path
+  strcpy(currentDir, getenv("HOME"));
 
   for(;;) {
-    printf("%s",buildPrefix(currentPath));
+    printf("%s",buildPrefix(currentDir));
 
     fgets(instruction,MAX_INSTR,stdin);
-    parseInput(instruction);
+    parseInput(instruction, phrase);
+
+    if (strcmp(phrase[0],"exit")) exit(0);
   }
 }
 
@@ -40,8 +46,8 @@ char* switchHome(char* currentDir) {
   return currentDir;
 }
 
-/* Try to get the user's username and build the
- * prefix on top of that
+/* Try to get the user's username and add it to the
+ * current directory the user is in
  */
 char* buildPrefix(char* currentDir) {
   static char prefix[PATHSIZE];
@@ -54,8 +60,11 @@ char* buildPrefix(char* currentDir) {
   return prefix;
 }
 
-void parseInput(char* instruction) {
-  char *phrase[75];
+/* Separate the users instruction into an array of actionable
+ * components.
+ * Places item into an array of components passed to main 
+ */
+void parseInput(char* instruction, char* phrase[MAX_INSTR/2]) {
   int counter=0;
   char delim[] = " ";
   char *ptr = strtok(instruction, delim);
@@ -66,6 +75,4 @@ void parseInput(char* instruction) {
     ptr = strtok(NULL, delim);
     counter++;
   }
-
-  if (strcmp(phrase[0],"exit")) exit(0);
 }
