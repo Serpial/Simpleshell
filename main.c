@@ -31,6 +31,7 @@ int main() {
     // get user and input and get rid of trailing control characters
     //    inserted by fgets also exits on Ctrl-D
     if (fgets(instruction, sizeof instruction, stdin)==NULL){
+      printf("\n");
       exit(0);
     }
     size_t len = strlen(instruction);
@@ -45,11 +46,12 @@ int main() {
       exit(0);
     }
 
+    // A  method of acessing the items
     int counter=0;
-    while(phrase[counter]!=NULL) {
-      printf("[%s]\n", phrase[counter++]);
+    while(phrase[counter][0]!='\0') {
+      printf("%d:%s\n", counter, phrase[counter]);
+      counter++;
     }
-    
   }
 }
 
@@ -99,7 +101,7 @@ void parseInput(char* instruction, char* phrase[MAX_INSTR/2]) {
   
   while (splitPoint != NULL) {
     for (int i=0; i<strlen(specialChar); ) {
-      occurance = strchr(splitPoint, specialChar[0]);
+      occurance = strchr(splitPoint, specialChar[i]);
       if (occurance!=NULL) {
         for (int j=0; j<(occurance-splitPoint); j++) {
           connectedWord[connectedLettNo++]=splitPoint[j];
@@ -135,7 +137,7 @@ void parseInput(char* instruction, char* phrase[MAX_INSTR/2]) {
     }
     splitPoint = strtok(NULL, delim);
   }
-  
+  phrase[itemNo+1]=malloc(1);
 }
 
 /* Fuction that empties the phrase variable for the 
@@ -144,6 +146,7 @@ void parseInput(char* instruction, char* phrase[MAX_INSTR/2]) {
 void emptyPhrase(char* phrase[MAX_INSTR/2]) {
   int counter=0;
   while (phrase[counter]!=NULL) {
-    phrase[counter++]=NULL;
+    phrase[counter]=NULL;
+    counter++;
   }
 }
