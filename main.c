@@ -11,7 +11,7 @@
 char* switchHome(char* currentDir);
 char* buildPrefix(char* currentDir);
 void parseInput(char* instruction, char* phrase[MAX_INSTR/2]);
-int executeExternal(char* phrase[MAX_INSTR/2] );
+void executeExternal(char* phrase[MAX_INSTR/2] );
 
 
 int main() {
@@ -80,30 +80,34 @@ void parseInput(char* instruction, char* phrase[MAX_INSTR/2]) {
   }
 }
 
-int executeExternal(char* phrase[MAX_INSTR/2]){
-  pid_t pid, ppid;
-
-
+void executeExternal(char* phrase[MAX_INSTR/2]){
+  pid_t pid;
   pid = fork(); //duplicates process 
-  if (pid == 0){ // in the child and so can execute the command 
-   // use execvp to execute the command and detect errors    
-    if (execvp(phrase[0], phrase)== -1){
-      printf("%s:Sorry, we do not recognise this command. \n", phrase[0]);
-      exit(2);
 
-    }
-
+  if (pid == -1){ // fork is less than zero and so an error has occured
+      perror("Error has occurred, fork has failed");
   }
-  else if (pid >0){// in the parent process 
-    // wait for child to complete
+
+  else if (pid == 0){ // in the child and so can execute the command 
+   // use execvp to execute the command and detect errors    
+    if (execvp(phrase[0], phrase)==-1){
+      printf("we dont recognise this command");
+      exit(1);
+    } 
+
+   /*
+    execvp(phrase[0], phrase);
+    perror("failed");
+    exit(1);
+    */
+      
+  }
+  else { // in the parent process 
     int status;
     waitpid(pid, &status,0);
   }
 
-  else{ // fork is less than zero and so an error has occured
-    fprintf(stderr, "Error has occurred, fork has failed");
-    return 0;
-  }
-  return 1;
+ 
+
   
 }
