@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 /* Definitions */
 #define PATHSIZE 200      // Maximum number of chars in currentDir
@@ -10,7 +11,7 @@
 char* switchHome(char* currentDir);
 char* buildPrefix(char* currentDir);
 void parseInput(char* instruction, char* phrase[MAX_INSTR/2]);
-
+int executeExternal(char * phrase[MAX_INSTR/2]);
 
 
 int main() {
@@ -26,8 +27,10 @@ int main() {
 
     fgets(instruction,MAX_INSTR,stdin);
     parseInput(instruction, phrase);
+    executeExternal(phrase);
 
     if (strcmp(phrase[0],"exit")) exit(0);
+  
   }
 }
 
@@ -68,11 +71,43 @@ void parseInput(char* instruction, char* phrase[MAX_INSTR/2]) {
   int counter=0;
   char delim[] = " ";
   char *ptr = strtok(instruction, delim);
-  
   while (ptr != NULL) {
     phrase[counter]=malloc(100);
     strcpy (phrase[counter], ptr);
     ptr = strtok(NULL, delim);
     counter++;
+
   }
+}
+
+int executeExternal(char* phrase[MAX_INSTR/2]){
+  pid_t pid, ppid;
+
+/*
+char* ls_args[] = {"ls" , "-1", NULL};
+execvp(ls_args[0], ls_args);
+perror("execv");
+return 2;
+
+*/
+  pid = fork(); //duplicates process 
+  if (pid == 0){ // in the child and so can execute the command 
+   // use execvp to execute the command and detect errors    
+    if (execvp(phrase[0], phrase )== -1){
+      printf("%s: Sorry, we do not recognise this command. \n", phrase[0]);
+      exit(2);
+    }
+
+  }
+  else if (pid >0){// in the parent process 
+    // wait for child to complete
+    int status;
+    waitpid(pid, &status,0);
+  }
+  else{ // fork is less than zero and so an error has occured
+    fprintf(stderr, "Error has occurred, fork has failed");
+    exit(EXIT_FAILURE);
+  }
+  return 1;
+  
 }
