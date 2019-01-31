@@ -90,16 +90,11 @@ void executeExternal(char* phrase[MAX_INSTR/2]){
 
   else if (pid == 0){ // in the child and so can execute the command 
    // use execvp to execute the command and detect errors    
-    if (execvp(phrase[0], phrase)==-1){
-      printf("we dont recognise this command");
-      exit(1);
+    if (execvp(phrase[0], phrase)== -1){
+      printf(" %s: we dont recognise this command\n", phrase[0]);
     } 
 
-   /*
-    execvp(phrase[0], phrase);
-    perror("failed");
-    exit(1);
-    */
+
       
   }
   else { // in the parent process 
