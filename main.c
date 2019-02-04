@@ -48,7 +48,7 @@ int main() {
 
     // A  method of acessing the items
     int counter=0;
-    while(phrase[counter][0]!='\0') {
+    while(phrase[counter]!=NULL) {
       printf("%d:%s\n", counter, phrase[counter]);
       counter++;
     }
@@ -91,53 +91,35 @@ char* buildPrefix(char* currentDir) {
  * tokens and for them still to be parsed correctly
  */
 void parseInput(char* instruction, char* phrase[MAX_INSTR/2]) {
-  int itemNo=-1, connectedLettNo=0;
-  char delim[] = " ", specialChar[] = "|><&;";
-  char* occurance,* splitPoint = strtok(instruction, delim);
-  char connectedWord[MAX_INSTR/2], strChr[2];
-
-  // strChr allow each conversion of char to string
-  strChr[1]='\0';
+  char specialChar[] = "|><&;";
+  int counter=0, wordIdx=0, letterIdx=0;
   
-  while (splitPoint != NULL) {
-    for (int i=0; i<strlen(specialChar); ) {
-      occurance = strchr(splitPoint, specialChar[i]);
-      if (occurance!=NULL) {
-        for (int j=0; j<(occurance-splitPoint); j++) {
-          connectedWord[connectedLettNo++]=splitPoint[j];
+  while (counter<strlen(instruction)&&counter<MAX_INSTR){
+    if (strchr(specialChar, instruction[counter])==NULL) {
+      if (instruction[counter]!=' ') {
+        if (letterIdx==0) {
+          phrase[wordIdx]=malloc(100);
         }
-        
-        // Get rid of everything upto (and incl.) the special character
-        splitPoint = splitPoint + (occurance-splitPoint+1);
-        
-        // Add the phrase before the spec. char. to the phrase if there is one
-        if (connectedLettNo!=0) { 
-          connectedWord[connectedLettNo]='\0';
-          phrase[++itemNo]=malloc(100);
-          strcpy (phrase[itemNo], connectedWord);
-        }
-        
-        // Add the special character to the phrase
-        phrase[++itemNo]=malloc(100);
-        strChr[0]=specialChar[i];
-        strcpy (phrase[itemNo], strChr);
-          
-        // Make this zero so we can have another word
-        connectedLettNo=0;
-      } else {
-        i++;
-      }
-      if (i >= strlen(specialChar)) {
-        // If the item doesn't contain a special character then add to phrase
-        if (splitPoint[0]!='\0'){
-          phrase[++itemNo]=malloc(100);
-          strcpy (phrase[itemNo], splitPoint);
+        phrase[wordIdx][letterIdx++]=instruction[counter];
+        if (instruction[counter+1]==' ') {
+          phrase[wordIdx][letterIdx]='\0';
+          wordIdx++;
+          letterIdx=0;
         }
       }
+    } else {
+      if (letterIdx!=0) {
+        phrase[wordIdx][letterIdx]='\0';
+        wordIdx++;
+        letterIdx=0;
+      }
+      phrase[wordIdx]=malloc(2);
+      phrase[wordIdx][0]=instruction[counter];
+      phrase[wordIdx][1]='\0';
+      wordIdx++;      
     }
-    splitPoint = strtok(NULL, delim);
+    counter++;
   }
-  phrase[itemNo+1]=malloc(1);
 }
 
 /* Fuction that empties the phrase variable for the 
