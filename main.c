@@ -49,7 +49,8 @@ int main() {
     // A  method of acessing the items
     int counter=0;
     while(phrase[counter]!=NULL) {
-      printf("%d:%s\n", counter, phrase[counter]);
+      printf("%d:", counter+1);
+      printf("%s\n",phrase[counter]);
       counter++;
     }
   }
@@ -116,10 +117,11 @@ void parseInput(char* instruction, char* phrase[MAX_INSTR/2]) {
       phrase[wordIdx]=malloc(2);
       phrase[wordIdx][0]=instruction[counter];
       phrase[wordIdx][1]='\0';
-      wordIdx++;      
+      wordIdx++;
     }
     counter++;
   }
+  phrase[wordIdx]=NULL;
 }
 
 /* Fuction that empties the phrase variable for the 
