@@ -10,6 +10,7 @@
 char* switchHome(char* currentDir);
 char* buildPrefix(char* currentDir);
 void parseInput(char* instruction, char* phrase[MAX_INSTR/2]);
+void emptyPhrase(char* phrase[MAX_INSTR/2]);
 
 
 
@@ -22,12 +23,36 @@ int main() {
   strcpy(currentDir, getenv("HOME"));
 
   for(;;) {
+    memset(instruction,0,strlen(instruction));
+    emptyPhrase(phrase);
+    
     printf("%s",buildPrefix(currentDir));
 
-    fgets(instruction,MAX_INSTR,stdin);
+    // get user and input and get rid of trailing control characters
+    //    inserted by fgets also exits on Ctrl-D
+    if (fgets(instruction, sizeof instruction, stdin)==NULL){
+      printf("\n");
+      exit(0);
+    }
+    size_t len = strlen(instruction);
+    if (len && (instruction[len-1] == '\n')) {
+      instruction[len-1] = '\0';
+    }
+
     parseInput(instruction, phrase);
 
-    if (strcmp(phrase[0],"exit")) exit(0);
+    // exit on "exit"
+    if(strcmp(instruction,"exit")==0) {
+      exit(0);
+    }
+
+    // A  method of acessing the items
+    int counter=0;
+    while(phrase[counter]!=NULL) {
+      printf("%d:", counter+1);
+      printf("%s\n",phrase[counter]);
+      counter++;
+    }
   }
 }
 
@@ -63,16 +88,49 @@ char* buildPrefix(char* currentDir) {
 /* Separate the users instruction into an array of actionable
  * components.
  * Places item into an array of components passed to main 
+ * Also allows for characters to be inserted in the middle of
+ * tokens and for them still to be parsed correctly
  */
 void parseInput(char* instruction, char* phrase[MAX_INSTR/2]) {
-  int counter=0;
-  char delim[] = " ";
-  char *ptr = strtok(instruction, delim);
+  char specialChar[] = "|><&;";
+  int counter=0, wordIdx=0, letterIdx=0;
   
-  while (ptr != NULL) {
-    phrase[counter]=malloc(100);
-    strcpy (phrase[counter], ptr);
-    ptr = strtok(NULL, delim);
+  while (counter<strlen(instruction)&&counter<MAX_INSTR){
+    if (strchr(specialChar, instruction[counter])==NULL) {
+      if (instruction[counter]!=' ') {
+        if (letterIdx==0) {
+          phrase[wordIdx]=malloc(100);
+        }
+        phrase[wordIdx][letterIdx++]=instruction[counter];
+        if (instruction[counter+1]==' '||instruction[counter+1]=='\0') {
+          phrase[wordIdx][letterIdx]='\0';
+          wordIdx++;
+          letterIdx=0;
+        }
+      }
+    } else {
+      if (letterIdx!=0) {
+        phrase[wordIdx][letterIdx]='\0';
+        wordIdx++;
+        letterIdx=0;
+      }
+      phrase[wordIdx]=malloc(2);
+      phrase[wordIdx][0]=instruction[counter];
+      phrase[wordIdx][1]='\0';
+      wordIdx++;
+    }
+    counter++;
+  }
+  phrase[wordIdx]=NULL;
+}
+
+/* Fuction that empties the phrase variable for the 
+ * next phrase
+ */
+void emptyPhrase(char* phrase[MAX_INSTR/2]) {
+  int counter=0;
+  while (phrase[counter]!=NULL) {
+    phrase[counter]=NULL;
     counter++;
   }
 }
