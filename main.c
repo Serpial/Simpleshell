@@ -130,7 +130,7 @@ void parseInput(char* instruction, char* phrase[MAX_INSTR/2]) {
 void emptyPhrase(char* phrase[MAX_INSTR/2]) {
   int counter=0;
   while (phrase[counter]!=NULL) {
-    phrase[counter]=NULL;
+    memset(phrase[counter],0,strlen(phrase[counter]));
     counter++;
   }
 }
