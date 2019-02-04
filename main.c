@@ -102,7 +102,7 @@ void parseInput(char* instruction, char* phrase[MAX_INSTR/2]) {
           phrase[wordIdx]=malloc(100);
         }
         phrase[wordIdx][letterIdx++]=instruction[counter];
-        if (instruction[counter+1]==' ') {
+        if (instruction[counter+1]==' '||instruction[counter+1]=='\0') {
           phrase[wordIdx][letterIdx]='\0';
           wordIdx++;
           letterIdx=0;
