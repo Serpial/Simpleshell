@@ -15,22 +15,8 @@ char* buildPrefix(char* currentDir);
 void parseInput(char* instruction, char* phrase[MAX_INSTR/2]);
 void executeExternal(char* phrase[MAX_INSTR/2] );
 void emptyPhrase(char* phrase[MAX_INSTR/2]);
-void getPath(char* phrase[MAX_INSTR/2]){
-  if (phrase[1]!=NULL){
-    printf("Too many arguments\n");
-  } else {
-    printf("%s\n", getenv("PATH"));
-  }
-}
-void setPath(char* phrase[MAX_INSTR/2]) {
-  if (phrase[2]!=NULL){
-    printf("Too many arguments\n");
-  } else if (phrase[1]==NULL){
-    printf("Too few arguments\n");
-  } else {
-    setenv("PATH", phrase[1], 1);
-  }
-}
+void getPath(char* phrase[MAX_INSTR/2]);
+void setPath(char* phrase[MAX_INSTR/2]);
 
 
 int main() {
@@ -124,7 +110,9 @@ void parseInput(char* instruction, char* phrase[MAX_INSTR/2]) {
   int counter=0, wordIdx=0, letterIdx=0;
   
   while (counter<strlen(instruction)&&counter<MAX_INSTR){
+    // If the character is not a special character
     if (strchr(specialChar, instruction[counter])==NULL) {
+      // then added it to a member of the phrase
       if (instruction[counter]!=' ') {
         if (letterIdx==0) {
           phrase[wordIdx]=malloc(100);
@@ -137,6 +125,7 @@ void parseInput(char* instruction, char* phrase[MAX_INSTR/2]) {
         }
       }
     } else {
+      // Add the special character to the phrase
       if (letterIdx!=0) {
         phrase[wordIdx][letterIdx]='\0';
         wordIdx++;
@@ -149,6 +138,7 @@ void parseInput(char* instruction, char* phrase[MAX_INSTR/2]) {
     }
     counter++;
   }
+  // Set the value after the last phrase to NULL
   phrase[wordIdx]=NULL;
 }
 
@@ -164,19 +154,12 @@ void executeExternal(char* phrase[MAX_INSTR/2]){
    // use execvp to execute the command and detect errors    
     if (execvp(phrase[0], phrase)== -1){
       printf(" %s: we dont recognise this command\n", phrase[0]);
-    } 
-
-
-      
+    }    
   }
   else { // in the parent process 
     int status;
     waitpid(pid, &status,0);
   }
-
- 
-
-  
 }
 
 /* Fuction that empties the phrase variable for the 
@@ -187,5 +170,27 @@ void emptyPhrase(char* phrase[MAX_INSTR/2]) {
   while (phrase[counter]!=NULL) {
     memset(phrase[counter],0,strlen(phrase[counter]));
     counter++;
+  }
+}
+
+/* Allow the user to set the path environment variable
+ */
+void setPath(char* phrase[MAX_INSTR/2]) {
+  if (phrase[2]!=NULL){
+    printf("Too many arguments\n");
+  } else if (phrase[1]==NULL){
+    printf("Too few arguments\n");
+  } else {
+    setenv("PATH", phrase[1], 1);
+  }
+}
+
+/* Allow the user to get the path environment variable
+ */
+void getPath(char* phrase[MAX_INSTR/2]){
+  if (phrase[1]!=NULL){
+    printf("Too many arguments\n");
+  } else {
+    printf("%s\n", getenv("PATH"));
   }
 }
