@@ -15,17 +15,37 @@ char* buildPrefix(char* currentDir);
 void parseInput(char* instruction, char* phrase[MAX_INSTR/2]);
 void executeExternal(char* phrase[MAX_INSTR/2] );
 void emptyPhrase(char* phrase[MAX_INSTR/2]);
-
+void getPath(char* phrase[MAX_INSTR/2]){
+  if (phrase[1]!=NULL){
+    printf("Too many arguments\n");
+  } else {
+    printf("%s\n", getenv("PATH"));
+  }
+}
+void setPath(char* phrase[MAX_INSTR/2]) {
+  if (phrase[2]!=NULL){
+    printf("Too many arguments\n");
+  } else if (phrase[1]==NULL){
+    printf("Too few arguments\n");
+  } else {
+    setenv("PATH", phrase[1], 1);
+  }
+}
 
 
 int main() {
   char currentDir[PATHSIZE]; // Current Directory the user in in
   char instruction[MAX_INSTR]; // Pre-parsed instruction
   char *phrase[MAX_INSTR/2]; // Array of components of the instruction
+  char orignalPath[500];
 
   // Use the default home directory as the default path
   strcpy(currentDir, getenv("HOME"));
+  strcpy(orignalPath, getenv("PATH"));
 
+  // Sets current directory to current diretory
+  chdir(currentDir);
+  
   for(;;) {
     memset(instruction,0,strlen(instruction));
     emptyPhrase(phrase);
@@ -48,8 +68,20 @@ int main() {
     }
 
     parseInput(instruction, phrase);
-    executeExternal(phrase);
+
+    if (strcmp(phrase[0], "getpath")==0) {
+      getPath(phrase);
+    } else if (strcmp(phrase[0], "setpath")==0) {
+      setPath(phrase);
+    } else {
+      executeExternal(phrase);
+    }
   }
+
+
+
+  setenv("PATH", orignalPath, 1);
+  
 }
 
 
