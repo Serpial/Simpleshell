@@ -23,11 +23,11 @@ int main() {
   char currentDir[PATHSIZE]; // Current Directory the user in in
   char instruction[MAX_INSTR]; // Pre-parsed instruction
   char *phrase[MAX_INSTR/2]; // Array of components of the instruction
-  char orignalPath[500];
+  char originalPath[500];
 
   // Use the default home directory as the default path
   strcpy(currentDir, getenv("HOME"));
-  strcpy(orignalPath, getenv("PATH"));
+  strcpy(originalPath, getenv("PATH"));
 
   // Sets current directory to current diretory
   chdir(currentDir);
@@ -55,18 +55,20 @@ int main() {
 
     parseInput(instruction, phrase);
 
-    if (strcmp(phrase[0], "getpath")==0) {
-      getPath(phrase);
-    } else if (strcmp(phrase[0], "setpath")==0) {
-      setPath(phrase);
-    } else {
-      executeExternal(phrase);
+    if (phrase[0]!=NULL){
+      if (strcmp(phrase[0], "getpath")==0) {
+        getPath(phrase);
+      } else if (strcmp(phrase[0], "setpath")==0) {
+        setPath(phrase);
+      } else {
+        executeExternal(phrase);
+      }
     }
   }
 
 
 
-  setenv("PATH", orignalPath, 1);
+  setenv("PATH", originalPath, 1);
   
 }
 
