@@ -36,16 +36,8 @@ void readHistory(char * *histArray, int *rear){
 	fclose(fp);
 }
 
-void printHistory(){
-	FILE *fp;
-	int x;
-	file = fopen(".hist_list","a+");
-	
-	x = getc(fp);
-	while (x!= EOF){
-		putchar(x);
-		x = getc(fp);
-		printf(%s,x);
-	}
-	fclose(fp);
+void printHistory(int histPrint){
+    for(int i = 1; i<= histPrint; i++){
+        printf(%s,histArray[i])
+    }
 }
