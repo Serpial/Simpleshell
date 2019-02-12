@@ -188,7 +188,7 @@ void setPath(char* phrase[MAX_INSTR/2]) {
     strcpy(tempPath, phrase[1]);
     strcat(tempPath, ":");
     strcat(tempPath, getenv("PATH"));
-    setenv("PATH", phrase[1], 1);
+    setenv("PATH", tempPath, 1);
   }
 }
 
