@@ -44,19 +44,19 @@ int main() {
       printf("\n");
       exit(0);
     }
+    // fgets causes a \n to be placed on the back of input.
     size_t len = strlen(instruction);
     if (len && (instruction[len-1] == '\n')) {
+      // This changes the '\n' to '\0
       instruction[len-1] = '\0';
-    }
-    // exit on "exit"
-    if(strcmp(instruction,"exit")==0) {
-      exit(0);
     }
 
     parseInput(instruction, phrase);
 
     if (phrase[0]!=NULL){
-      if (strcmp(phrase[0], "getpath")==0) {
+      if(strcmp(phrase[0],"exit")==0) {
+        exit(0);
+      } else if (strcmp(phrase[0], "getpath")==0) {
         getPath(phrase);
       } else if (strcmp(phrase[0], "setpath")==0) {
         setPath(phrase);
