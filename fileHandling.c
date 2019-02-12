@@ -13,7 +13,7 @@ void writeHistory(char *c, char * *histArray, int *rear){
 	* rear = (* rear+1)%MAX_HISTORY_SIZE
 	
 	FILE *fp;
-	file = fopen("history.txt","a");
+	file = fopen(".hist_list","a");
 	fprintf(fp,"%s",c);
 	fclose(fp);
 }
@@ -21,7 +21,7 @@ void writeHistory(char *c, char * *histArray, int *rear){
 void readHistory(char * *histArray, int *rear){
 	FILE *fp;
 	int x;
-	file = fopen("history.txt","a+");
+	file = fopen(".hist_list","a+");
 	
 	//Reading
 	x = getc(fp);
@@ -39,7 +39,7 @@ void readHistory(char * *histArray, int *rear){
 void printHistory(){
 	FILE *fp;
 	int x;
-	file = fopen("history.txt","a+");
+	file = fopen(".hist_list","a+");
 	
 	x = getc(fp);
 	while (x!= EOF){
