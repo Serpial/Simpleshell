@@ -8,8 +8,9 @@
 /* Definitions */
 #define PATHSIZE 200      // Maximum number of chars in currentDir
 #define MAX_INSTR 512     // Maximum number of chars per phrase
-
+#define MAX_HISTORY_SIZE 20//Maximum number of instructions stored 
 /* Prototypes */
+
 char* buildPrefix(char* directory);
 void parseInput(char* instruction, char* phrase[MAX_INSTR/2]);
 void emptyPhrase(char* phrase[MAX_INSTR/2]);
@@ -18,11 +19,14 @@ void getPath(char* phrase[MAX_INSTR/2]);
 void setPath(char* phrase[MAX_INSTR/2]);
 void changeDirectory(char **arguments);
 void executeInstruction (char *phrase[MAX_INSTR/2], char* instruction,
-                         char *history[21]);
+                         char *history[21], int *rear);
 void singleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
                         char *history[21]);
 void doubleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
                         char *history[21]);
+void writeHistory(char *c, char  *history[21], int *rear);
+void readHistory(char  *history[21], int *rear);
+void printHistory(char *history[21]);
 
 /* Main Function */
 int main() {
@@ -31,6 +35,16 @@ int main() {
   char *phrase[MAX_INSTR/2]; // Array of components of the instruction
   char originalPath[500];
   char *history[21];
+  int *rear = 0;
+  //char *histArray[MAX_HISTORY_SIZE];
+
+  //iniitialises and allocates memory
+  for (int i = 0; i <= MAX_HISTORY_SIZE; i++) {
+    history[i] = (char * ) malloc(512);
+    strcpy(history[i], "\0");
+  }
+
+
 
   // Use the default home directory as the default path
   strcpy(currentDir, getenv("HOME"));
@@ -60,7 +74,7 @@ int main() {
     }
 
     // Run the given command
-    executeInstruction(phrase, instruction, history);
+    executeInstruction(phrase, instruction, history, rear);
   }
 
   // Reset the path to what it was before the session was opened
@@ -68,7 +82,7 @@ int main() {
 }
 
 void executeInstruction (char *phrase[MAX_INSTR/2], char* instruction,
-                         char *history[21]) {
+                         char *history[21], int *rear) {
 
   parseInput(instruction, phrase);
 
@@ -82,7 +96,7 @@ void executeInstruction (char *phrase[MAX_INSTR/2], char* instruction,
     } else if (strcmp(phrase[0], "!")==0) {
       singleExclamation(phrase, instruction, history);      
     } else if (strcmp(phrase[0], "history")==0) {
-      // getHistory();
+      readHistory(history, rear);
     } else if (strcmp(phrase[0], "cd")==0) {
       changeDirectory(phrase);
     } else if (strcmp(instruction, "exit")==0) {
@@ -264,7 +278,7 @@ void singleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
       lineNum = lineNum * 10 + (phrase[1][i] - '0');
     }
     if (lineNum > 20 || lineNum <1) {
-      executeInstruction(phrase, history[lineNum], history);
+      executeInstruction(phrase, history[lineNum], history, NULL);
     } else {
       printf("invalid item : %i\n", lineNum);
     }
@@ -277,8 +291,56 @@ void doubleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
   int counter;
   if (phrase[1]!=NULL){
     printf("%s\n", instruction);
-    executeInstruction(phrase, history[counter-1], history);
+    executeInstruction(phrase, history[counter-1], history, NULL);
   } else {
     printf("Too few arguments\n");
   }
 }
+
+
+void writeHistory(char *c, char *history[21], int *rear){
+  strcpy(history[* rear], c);
+  * rear = (* rear+1)%MAX_HISTORY_SIZE;
+  FILE *fp;
+  fp= fopen("./hist_list","a");
+  if (fp == NULL){
+    printf("Could not open file");
+    exit(1);
+  }
+  fprintf(fp,"%s",c);
+  }
+
+
+void readHistory(char *history[21], int *rear){
+  FILE *fp;
+  char x;
+  fp = fopen("./hist_list","a+");
+  
+  //Reading
+  x = getc(fp);
+  while (x!= EOF){
+    putchar(x);
+    x = getc(fp);
+    strcpy(history[*rear], &x);
+    * rear = (* rear+1)%MAX_HISTORY_SIZE;
+  }
+  fclose(fp);
+  for(int i = 1; i<= MAX_HISTORY_SIZE; i++){
+        printf("%i. %s \n", i, history[i]);
+    }
+}
+
+
+/**ß
+void printHistory(char *history[21]){
+    for(int i = 1; i<= 21; i++){
+        printf("%s", history[i]);
+    }
+}
+*/
+
+
+
+
+
+
