@@ -10,21 +10,27 @@
 #define MAX_INSTR 512     // Maximum number of chars per phrase
 
 /* Prototypes */
-char* switchHome(char* currentDir);
-char* buildPrefix(char* currentDir);
+char* buildPrefix(char* directory);
 void parseInput(char* instruction, char* phrase[MAX_INSTR/2]);
 void emptyPhrase(char* phrase[MAX_INSTR/2]);
-void executeExternal(char* phrase[MAX_INSTR/2] );
+void executeExternal(char* phrase[MAX_INSTR/2]);
 void getPath(char* phrase[MAX_INSTR/2]);
 void setPath(char* phrase[MAX_INSTR/2]);
 void changeDirectory(char **arguments);
+void executeInstruction (char *phrase[MAX_INSTR/2], char* instruction,
+                         char *history[21]);
+void singleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
+                        char *history[21]);
+void doubleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
+                        char *history[21]);
 
-
+/* Main Function */
 int main() {
-  char currentDir[PATHSIZE]; // Current Directory the user in in
+  char currentDir[PATHSIZE]; // Current Directory the user is in
   char instruction[MAX_INSTR]; // Pre-parsed instruction
   char *phrase[MAX_INSTR/2]; // Array of components of the instruction
   char originalPath[500];
+  char *history[21];
 
   // Use the default home directory as the default path
   strcpy(currentDir, getenv("HOME"));
@@ -32,11 +38,12 @@ int main() {
 
   // Sets current directory to current diretory
   chdir(currentDir);
-  
+
   for(;;) {
     memset(instruction,0,strlen(instruction));
     emptyPhrase(phrase);
-    
+
+    getcwd(currentDir, sizeof(currentDir));
     printf("%s",buildPrefix(currentDir));
 
     // get user and input and get rid of trailing control characters
@@ -45,62 +52,69 @@ int main() {
       printf("\n");
       exit(0);
     }
+    // Get rid of the \n that fgets places in the string
     size_t len = strlen(instruction);
     if (len && (instruction[len-1] == '\n')) {
       instruction[len-1] = '\0';
     }
-    // exit on "exit"
-    if(strcmp(instruction,"exit")==0) {
-      exit(0);
-    }
 
-    parseInput(instruction, phrase);
-
-    if (phrase[0]!=NULL){
-      if (strcmp(phrase[0], "getpath")==0) {
-        getPath(phrase);
-      } else if (strcmp(phrase[0], "setpath")==0) {
-        setPath(phrase);
-      } else if (strcmp(phrase[0], "cd")==0) {
-        changeDirectory(phrase);
-      } else {
-        executeExternal(phrase);
-      }
-    }
+    // Run the given command
+    executeInstruction(phrase, instruction, history);
   }
 
-
-
+  // Reset the path to what it was before the session was opened
   setenv("PATH", originalPath, 1);
-  
 }
 
+void executeInstruction (char *phrase[MAX_INSTR/2], char* instruction,
+                         char *history[21]) {
 
-/* switches "/home/<username>" to "~"
- */
-char* switchHome(char* currentDir) {
-  char* temp = malloc(PATHSIZE);
-  static char newDir[PATHSIZE];
-  if (strstr(currentDir, getenv("HOME"))) {
-    newDir[0] = '~'; newDir[1]='\0';
-    strncpy(temp, currentDir+strlen(getenv("HOME")),PATHSIZE);
-    strcat(newDir, temp);
-    return newDir;
+  parseInput(instruction, phrase);
+
+  if (phrase[0]!=NULL){
+    if (strcmp(phrase[0], "getpath")==0) {
+      getPath(phrase);
+    } else if (strcmp(phrase[0], "setpath")==0) {
+      setPath(phrase);
+    } else if (strcmp(instruction, "!!")==0) {
+      doubleExclamation(phrase, instruction, history);
+    } else if (strcmp(phrase[0], "!")==0) {
+      singleExclamation(phrase, instruction, history);      
+    } else if (strcmp(phrase[0], "history")==0) {
+      // getHistory();
+    } else if (strcmp(phrase[0], "cd")==0) {
+      changeDirectory(phrase);
+    } else if (strcmp(instruction, "exit")==0) {
+      exit(0);
+    } else {
+      executeExternal(phrase);
+    }
   }
-  return currentDir;
 }
 
 /* Try to get the user's username and add it to the
  * current directory the user is in
  */
-char* buildPrefix(char* currentDir) {
+char* buildPrefix(char* directory) {
   static char prefix[PATHSIZE];
-  char *name;
+  char *name, *temp = malloc(PATHSIZE);
+  static char newDir[PATHSIZE];
 
+  // switches "/home/<username>" to "~"
+  if (strstr(directory, getenv("HOME"))) {
+    newDir[0] = '~'; newDir[1]='\0';
+    strcpy(temp, directory+strlen(getenv("HOME")));
+    strcat(newDir, temp);
+  } else {
+    strcpy(newDir, directory);
+  }
+  
   strcpy(prefix, getenv("USER"));
   strcat(prefix, ":");
-  strcat(prefix, switchHome(currentDir));
+  strcat(prefix, newDir);
   strcat(prefix, "$ ");
+
+  free(temp);
   return prefix;
 }
 
@@ -120,10 +134,8 @@ void changeDirectory(char **arguments) {
   else {	
     if (strcmp(".", firstArgument) == 0) { // The . represents the current directory.
       chdir(".");
-      
     } else if(strcmp("..", firstArgument) == 0) { // The .. represents the parent directory.
       chdir("..");
-      
     } else { 
       if(chdir(firstArgument) == -1) { // This will use the perror() function if there is no such directory.
         perror(firstArgument);
@@ -140,7 +152,7 @@ void changeDirectory(char **arguments) {
  * tokens and for them still to be parsed correctly
  */
 void parseInput(char* instruction, char* phrase[MAX_INSTR/2]) {
-  char specialChar[] = "|><&;";
+  char specialChar[] = "!|><&;";
   int counter=0, wordIdx=0, letterIdx=0;
   
   while (counter<strlen(instruction)&&counter<MAX_INSTR){
@@ -202,7 +214,7 @@ void executeExternal(char* phrase[MAX_INSTR/2]){
 void emptyPhrase(char* phrase[MAX_INSTR/2]) {
   int counter=0;
   while (phrase[counter]!=NULL) {
-    memset(phrase[counter],0,strlen(phrase[counter]));
+    *(&phrase[counter])=NULL;
     counter++;
   }
 }
@@ -226,5 +238,41 @@ void getPath(char* phrase[MAX_INSTR/2]){
     printf("Too many arguments\n");
   } else {
     printf("%s\n", getenv("PATH"));
+  }
+}
+
+/* Need further implentation */
+void singleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
+                        char *history[21]) {
+  int lineNum;
+  int len;
+  
+  if (phrase[2]!=NULL){
+    printf("Too many arguments\n");
+  } else if (phrase[1]==NULL){
+    printf("Too few arguments\n");
+  } else {
+    printf("%s\n", instruction);
+    len = strlen(phrase[1]);
+    for (int i=0; i<len; i++) {
+      lineNum = lineNum * 10 + (phrase[1][i] - '0');
+    }
+    if (lineNum > 20 || lineNum <1) {
+      executeInstruction(phrase, history[lineNum], history);
+    } else {
+      printf("invalid item : %i\n", lineNum);
+    }
+  }
+}
+
+/* Need further implentation */
+void doubleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
+                        char *history[21]) {
+  int counter;
+  if (phrase[1]!=NULL){
+    printf("%s\n", instruction);
+    executeInstruction(phrase, history[counter-1], history);
+  } else {
+    printf("Too few arguments\n");
   }
 }
