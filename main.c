@@ -24,7 +24,7 @@ void singleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
                         char *history[21]);
 void doubleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
                         char *history[21]);
-void writeHistory(char *c, char  *history[21], int *rear);
+void writeHistory(char *instruction, char  *history[21], int *rear);
 void readHistory(char  *history[21], int *rear);
 void printHistory(char *history[21]);
 
@@ -72,6 +72,10 @@ int main() {
       // This changes the '\n' to '\0
       instruction[len-1] = '\0';
     }
+
+    //add command to histroy 
+    writeHistory(instruction, history, rear);
+
 
     // Run the given command
     executeInstruction(phrase, instruction, history, rear);
@@ -298,8 +302,8 @@ void doubleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
 }
 
 
-void writeHistory(char *c, char *history[21], int *rear){
-  strcpy(history[* rear], c);
+void writeHistory(char *instruction, char *history[21], int *rear){
+  strcpy(history[* rear], instruction);
   * rear = (* rear+1)%MAX_HISTORY_SIZE;
   FILE *fp;
   fp= fopen("./hist_list","a");
@@ -307,7 +311,7 @@ void writeHistory(char *c, char *history[21], int *rear){
     printf("Could not open file");
     exit(1);
   }
-  fprintf(fp,"%s",c);
+  fprintf(fp,"%s", instruction);
   }
 
 
