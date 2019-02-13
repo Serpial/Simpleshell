@@ -247,7 +247,7 @@ void getPath(char* phrase[MAX_INSTR/2]){
   }
 }
 
-/* Need further implentation */
+/* Need further implementation */
 void singleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
                         char *history[21]) {
   int lineNum;
@@ -271,7 +271,7 @@ void singleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
   }
 }
 
-/* Need further implentation */
+/* Need further implementation */
 void doubleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
                         char *history[21]) {
   int counter;
