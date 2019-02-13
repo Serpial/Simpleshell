@@ -1,44 +1,43 @@
-void fileRead(){
-   FILE *fopen(), *fp;
-   int x;
-   fp = fopen("history.txt","r");
-   x = getc(fp);
-   while (x!= EOF){
-   		putchar(x);
-		x = getc(fp);
-		printf(%s,x);
-   }
-   fclose(fp);
-}
+const int MAX_HISTORY_SIZE = 20;
 
-void fileWrite(char *c){
+char * histArray[MAX_HISTORY_SIZE];
+for (int i = 0; i <= MAX_HISTORY_SIZE; i++) {
+    histArray[i] = (char * ) malloc(512);
+    strcpy(histArray[i], "\0");
+}
+int rear = 0;
+
+	
+void writeHistory(char *c, char * *histArray, int *rear){
+	strcpy(histArray[* rear], c);
+	* rear = (* rear+1)%MAX_HISTORY_SIZE
+	
 	FILE *fp;
-	file = fopen("history.txt","w");
+	file = fopen(".hist_list","a");
 	fprintf(fp,"%s",c);
 	fclose(fp);
 }
 
-void fileAppend(char *c){
-	FILE *fp;
-	file = fopen("history.txt","a");
-	fprintf(fp,"%s",c);
-	fclose(fp);
-}
-
-void fileAppendOrRead(char *c){
+void readHistory(char * *histArray, int *rear){
 	FILE *fp;
 	int x;
-	file = fopen("history.txt","a+");
+	file = fopen(".hist_list","a+");
 	
 	//Reading
 	x = getc(fp);
 	while (x!= EOF){
 		putchar(x);
 		x = getc(fp);
-		printf(%s,x);
+		strcpy(histArray[* rear], x);
+		* rear = (* rear+1)%MAX_HISTORY_SIZE
 	}
 	
-	//Write
-	fprintf(fp,"%s",c);
+	
 	fclose(fp);
+}
+
+void printHistory(int histPrint){
+    for(int i = 1; i<= histPrint; i++){
+        printf(%s,histArray[i])
+    }
 }
