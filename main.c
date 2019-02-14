@@ -6,9 +6,9 @@
 #include <sys/wait.h>
 
 /* Definitions */
-#define PATHSIZE 200      // Maximum number of chars in currentDir
-#define MAX_INSTR 512     // Maximum number of chars per phrase
-#define MAX_HISTORY_SIZE 20//Maximum number of instructions stored 
+#define PATHSIZE 200        // Maximum number of chars in currentDir
+#define MAX_INSTR 512       // Maximum number of chars per phrase
+#define MAX_HISTORY_SIZE 20 //Maximum number of instructions stored 
 /* Prototypes */
 
 char* buildPrefix(char* directory);
@@ -18,15 +18,16 @@ void executeExternal(char* phrase[MAX_INSTR/2]);
 void getPath(char* phrase[MAX_INSTR/2]);
 void setPath(char* phrase[MAX_INSTR/2]);
 void changeDirectory(char **arguments);
+void exitProgram(int exitCode);
+void writeHistory(char *instruction, char  *history[MAX_HISTORY_SIZE], int *rear);
+void readHistory(char  *history[MAX_HISTORY_SIZE], int *rear);
 void executeInstruction (char *phrase[MAX_INSTR/2], char* instruction,
                          char *history[21], int *rear);
 void singleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
                         char *history[21]);
 void doubleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
                         char *history[21]);
-void writeHistory(char *instruction, char  *history[21], int *rear);
-void readHistory(char  *history[21], int *rear);
-void printHistory(char *history[21]);
+// void printHistory(char *history[MAX_HISTORY_SIZE]);
 
 /* Main Function */
 int main() {
@@ -34,16 +35,16 @@ int main() {
   char instruction[MAX_INSTR]; // Pre-parsed instruction
   char *phrase[MAX_INSTR/2]; // Array of components of the instruction
   char originalPath[500];
-  char *history[21];
-  int *rear = 0;
+  char *history[MAX_HISTORY_SIZE];
+  int rear = 0;
   //char *histArray[MAX_HISTORY_SIZE];
 
+  
   //iniitialises and allocates memory
   for (int i = 0; i <= MAX_HISTORY_SIZE; i++) {
     history[i] = (char * ) malloc(512);
     strcpy(history[i], "\0");
   }
-
 
 
   // Use the default home directory as the default path
@@ -64,7 +65,7 @@ int main() {
     //    inserted by fgets also exits on Ctrl-D
     if (fgets(instruction, sizeof instruction, stdin)==NULL){
       printf("\n");
-      exit(0);
+      exitProgram(0);
     }
     // fgets causes a \n to be placed on the back of input.
     size_t len = strlen(instruction);
@@ -74,15 +75,11 @@ int main() {
     }
 
     //add command to histroy 
-    writeHistory(instruction, history, rear);
-
+    writeHistory(instruction, history, &rear);
 
     // Run the given command
-    executeInstruction(phrase, instruction, history, rear);
+    executeInstruction(phrase, instruction, history, &rear);
   }
-
-  // Reset the path to what it was before the session was opened
-  setenv("PATH", originalPath, 1);
 }
 
 void executeInstruction (char *phrase[MAX_INSTR/2], char* instruction,
@@ -104,7 +101,7 @@ void executeInstruction (char *phrase[MAX_INSTR/2], char* instruction,
     } else if (strcmp(phrase[0], "cd")==0) {
       changeDirectory(phrase);
     } else if (strcmp(instruction, "exit")==0) {
-      exit(0);
+      exitProgram(0);
     } else {
       executeExternal(phrase);
     }
@@ -302,24 +299,23 @@ void doubleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
 }
 
 
-void writeHistory(char *instruction, char *history[21], int *rear){
+void writeHistory(char *instruction, char *history[MAX_HISTORY_SIZE], int *rear){
   strcpy(history[* rear], instruction);
   * rear = (* rear+1)%MAX_HISTORY_SIZE;
   FILE *fp;
-  fp= fopen("./hist_list","a");
+  fp= fopen("./.hist_list","a");
   if (fp == NULL){
     printf("Could not open file");
-    exit(1);
+    exitProgram(1);
   }
-  fprintf(fp,"%s", instruction);
-  }
+  fprintf(fp,"%s\n", instruction);
+}
 
 
-void readHistory(char *history[21], int *rear){
+void readHistory(char *history[MAX_HISTORY_SIZE], int *rear){
   FILE *fp;
   char x;
-  fp = fopen("./hist_list","a+");
-  
+  fp = fopen("./.hist_list","a+");
   //Reading
   x = getc(fp);
   while (x!= EOF){
@@ -330,21 +326,13 @@ void readHistory(char *history[21], int *rear){
   }
   fclose(fp);
   for(int i = 1; i<= MAX_HISTORY_SIZE; i++){
-        printf("%i. %s \n", i, history[i]);
-    }
+    printf("%i. %s \n", i, history[i]);
+  }
 }
 
-
-/**ß
-void printHistory(char *history[21]){
-    for(int i = 1; i<= 21; i++){
-        printf("%s", history[i]);
-    }
+/* Ran on the way out */
+void exitProgram(int exitCode) {
+  // Reset the path to what it was before the session was opened
+  setenv("PATH", originalPath, 1);
+  exit(exitCode);
 }
-*/
-
-
-
-
-
-
