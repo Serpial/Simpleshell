@@ -76,7 +76,6 @@ int main() {
 
     //add command to histroy 
     writeHistory(instruction, history, &rear, originalPath);
-
     // Run the given command
     executeInstruction(phrase, instruction, history, &rear, originalPath);
   }
@@ -326,7 +325,7 @@ void readHistory(char *history[MAX_HISTORY_SIZE], int *rear){
   }
   fclose(fp);
   for(int i = 0; i<= MAX_HISTORY_SIZE+1; i++){
-    printf("%i. %s \n", i, history[i]);
+    printf("%i. %s \n", i+1, history[i]);
   }
 }
 
