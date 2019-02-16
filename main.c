@@ -21,6 +21,7 @@ void changeDirectory(char **arguments);
 void exitProgram(int exitCode, char originalPath[500]);
 void writeHistory(char *instruction, char  *history[MAX_HISTORY_SIZE], int *rear, char originalPath[500]);
 void readHistory(char  *history[MAX_HISTORY_SIZE], int *rear);
+void printHistory(char *history[MAX_HISTORY_SIZE], int *rear);
 void executeInstruction (char *phrase[MAX_INSTR/2], char* instruction,
                          char *history[21], int *rear, char originalPath[500]);
 void singleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
@@ -96,7 +97,7 @@ void executeInstruction (char *phrase[MAX_INSTR/2], char* instruction,
     } else if (strcmp(phrase[0], "!")==0) {
       singleExclamation(phrase, instruction, history, originalPath);      
     } else if (strcmp(phrase[0], "history")==0) {
-      readHistory(history, rear);
+      printHistory(history, rear);
     } else if (strcmp(phrase[0], "cd")==0) {
       changeDirectory(phrase);
     } else if (strcmp(instruction, "exit")==0) {
@@ -324,9 +325,18 @@ void readHistory(char *history[MAX_HISTORY_SIZE], int *rear){
     * rear = (* rear+1)%MAX_HISTORY_SIZE;
   }
   fclose(fp);
-  for(int i = 0; i<= MAX_HISTORY_SIZE+1; i++){
-    printf("%i. %s \n", i+1, history[i]);
-  }
+
+}
+
+void printHistory(char *history[MAX_HISTORY_SIZE], int *rear){
+
+  int i = *rear;
+  //int historyIndex = 1;
+  do {
+     printf("%i. %s \n", i+1, history[i]);
+     i = (i+1)%MAX_HISTORY_SIZE;
+   } 
+   while ( i != *rear);
 }
 
 /* Ran on the way out */
