@@ -328,13 +328,15 @@ void readHistory(char *history[MAX_HISTORY_SIZE], int *rear){
 
 }
 
+/*prints 20 elemnets of history to the user */
 void printHistory(char *history[MAX_HISTORY_SIZE], int *rear){
-
+  //set i to be a copy of rear to read in from most recent 
   int i = *rear;
-  //int historyIndex = 1;
+  int historyIndex =1;
   do {
-     printf("%i. %s \n", i+1, history[i]);
-     i = (i+1)%MAX_HISTORY_SIZE;
+    if (strcmp(history[i], "\0") != 0) //only show elements in array that arent null
+     printf("%i. %s \n", historyIndex++, history[i]); //print history
+     i = (i+1)%MAX_HISTORY_SIZE; //update i to ensure its circular
    } 
    while ( i != *rear);
 }
