@@ -147,7 +147,7 @@ void changeDirectory(char **arguments) {
   if (firstArgument == NULL) { // If there is no argument entered, it will act as the home directory link (if "cd" is entered on it's own). This is the first form as specified in the ACE4 PDF.
     chdir(getenv("HOME"));
   } 
-  else {	
+  else {  
     if (strcmp(".", firstArgument) == 0) { // The . represents the current directory.
       chdir(".");
     } else if(strcmp("..", firstArgument) == 0) { // The .. represents the parent directory.
@@ -159,6 +159,7 @@ void changeDirectory(char **arguments) {
     }
   }
 }
+
 
 
 /* Separate the users instruction into an array of actionable
