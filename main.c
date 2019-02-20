@@ -11,24 +11,27 @@
 
 /* Prototypes */
 char* buildPrefix(char* directory);
-void parseInput(char* instruction, char* phrase[MAX_INSTR/2]);
-void emptyPhrase(char* phrase[MAX_INSTR/2]);
-void executeExternal(char* phrase[MAX_INSTR/2]);
-void getPath(char* phrase[MAX_INSTR/2]);
-void setPath(char* phrase[MAX_INSTR/2]);
+void parseInput(char* instruction, char **phrase);
+void emptyPhrase(char **phrase);
+void executeExternal(char **phrase);
+void getPath(char **phrase);
+void setPath(char **phrase);
 void changeDirectory(char **arguments);
-void executeInstruction (char *phrase[MAX_INSTR/2], char* instruction,
+char** joinSubPhrase (char **phrase);
+void executeInstruction (char **phrase, char* instruction,
                          char *history[21]);
-void singleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
+void singleExclamation (char **phrase, char* instruction,
                         char *history[21]);
-void doubleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
+void doubleExclamation (char **phrase, char* instruction,
                         char *history[21]);
+
+
 
 /* Main Function */
 int main() {
   char currentDir[PATHSIZE]; // Current Directory the user is in
   char instruction[MAX_INSTR]; // Pre-parsed instruction
-  char *phrase[MAX_INSTR/2]; // Array of components of the instruction
+  char **phrase; // Array of components of the instruction
   char originalPath[500];
   char *history[21];
 
@@ -38,14 +41,11 @@ int main() {
 
   // Sets current directory to current diretory
   chdir(currentDir);
-
+  
   for(;;) {
-    memset(instruction,0,strlen(instruction));
-    emptyPhrase(phrase);
-
     getcwd(currentDir, sizeof(currentDir));
     printf("%s",buildPrefix(currentDir));
-
+    
     // get user and input and get rid of trailing control characters
     //    inserted by fgets also exits on Ctrl-D
     if (fgets(instruction, sizeof instruction, stdin)==NULL){
@@ -58,19 +58,30 @@ int main() {
       // This changes the '\n' to '\0
       instruction[len-1] = '\0';
     }
-
+    
     // Run the given command
     executeInstruction(phrase, instruction, history);
+    memset(instruction,0,strlen(instruction));
+    emptyPhrase(phrase);
+
   }
 
   // Reset the path to what it was before the session was opened
   setenv("PATH", originalPath, 1);
 }
 
-void executeInstruction (char *phrase[MAX_INSTR/2], char* instruction,
+void executeInstruction (char **phrase, char* instruction,
                          char *history[21]) {
 
   parseInput(instruction, phrase);
+  printf("?\n");
+
+  int counter = 0;
+  while (phrase[counter]!=NULL) {
+    printf("%s\n", phrase[counter]);
+  }
+  printf("??\n"); 
+  phrase = joinSubPhrase(phrase); 
 
   if (phrase[0]!=NULL){
     if (strcmp(phrase[0], "getpath")==0) {
@@ -152,9 +163,10 @@ void changeDirectory(char **arguments) {
  * Also allows for characters to be inserted in the middle of
  * tokens and for them still to be parsed correctly
  */
-void parseInput(char* instruction, char* phrase[MAX_INSTR/2]) {
-  char specialChar[] = "!|><&;";
+void parseInput(char* instruction, char **phrase) {
+  char specialChar[] = "!|><&;\"";
   int counter=0, wordIdx=0, letterIdx=0;
+  char *newPhrase[MAX_INSTR/2];
   
   while (counter<strlen(instruction)&&counter<MAX_INSTR){
     // If the character is not a special character
@@ -162,11 +174,11 @@ void parseInput(char* instruction, char* phrase[MAX_INSTR/2]) {
       // then added it to a member of the phrase
       if (instruction[counter]!=' ') {
         if (letterIdx==0) {
-          phrase[wordIdx]=malloc(100);
+          newPhrase[wordIdx]=malloc(100);
         }
-        phrase[wordIdx][letterIdx++]=instruction[counter];
+        newPhrase[wordIdx][letterIdx++]=instruction[counter];
         if (instruction[counter+1]==' '||instruction[counter+1]=='\0') {
-          phrase[wordIdx][letterIdx]='\0';
+          newPhrase[wordIdx][letterIdx]='\0';
           wordIdx++;
           letterIdx=0;
         }
@@ -174,22 +186,23 @@ void parseInput(char* instruction, char* phrase[MAX_INSTR/2]) {
     } else {
       // Add the special character to the phrase
       if (letterIdx!=0) {
-        phrase[wordIdx][letterIdx]='\0';
+        newPhrase[wordIdx][letterIdx]='\0';
         wordIdx++;
         letterIdx=0;
       }
-      phrase[wordIdx]=malloc(2);
-      phrase[wordIdx][0]=instruction[counter];
-      phrase[wordIdx][1]='\0';
+      newPhrase[wordIdx]=malloc(2);
+      newPhrase[wordIdx][0]=instruction[counter];
+      newPhrase[wordIdx][1]='\0';
       wordIdx++;
     }
     counter++;
   }
   // Set the value after the last phrase to NULL
-  phrase[wordIdx]=NULL;
+  newPhrase[wordIdx]=NULL;
+  phrase=newPhrase;
 }
 
-void executeExternal(char* phrase[MAX_INSTR/2]){
+void executeExternal(char **phrase){
   pid_t pid;
   pid = fork(); //duplicates process 
 
@@ -209,20 +222,19 @@ void executeExternal(char* phrase[MAX_INSTR/2]){
   }
 }
 
+
 /* Fuction that empties the phrase variable for the 
  * next phrase
  */
-void emptyPhrase(char* phrase[MAX_INSTR/2]) {
-  int counter=0;
-  while (phrase[counter]!=NULL) {
-    *(&phrase[counter])=NULL;
-    counter++;
+void emptyPhrase(char **phrase) {
+  for (int i=0; phrase[i]!=NULL; i++) {
+    phrase[i]=malloc(250);
   }
 }
 
 /* Allow the user to set the path environment variable
  */
-void setPath(char* phrase[MAX_INSTR/2]) {
+void setPath(char **phrase) {
   char tempPath[500];
 
   if (phrase[2]!=NULL){
@@ -239,7 +251,7 @@ void setPath(char* phrase[MAX_INSTR/2]) {
 
 /* Allow the user to get the path environment variable
  */
-void getPath(char* phrase[MAX_INSTR/2]){
+void getPath(char **phrase){
   if (phrase[1]!=NULL){
     printf("Too many arguments\n");
   } else {
@@ -248,7 +260,7 @@ void getPath(char* phrase[MAX_INSTR/2]){
 }
 
 /* Need further implementation */
-void singleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
+void singleExclamation (char **phrase, char* instruction,
                         char *history[21]) {
   int lineNum;
   int len;
@@ -272,7 +284,7 @@ void singleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
 }
 
 /* Need further implementation */
-void doubleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
+void doubleExclamation (char **phrase, char* instruction,
                         char *history[21]) {
   int counter;
   if (phrase[1]!=NULL){
@@ -281,4 +293,39 @@ void doubleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
   } else {
     printf("Too few arguments\n");
   }
+}
+
+char** joinSubPhrase (char **phrase) {
+  static char *newPhrase[MAX_INSTR/2];
+  int itemIndex=0;
+  
+  for (int i=0; phrase[i]!= NULL; i++) {
+    if (strcmp(phrase[i], "\"")==0) {
+      if (phrase[i+1]!=NULL){
+        newPhrase[itemIndex]=malloc(200);
+        strcpy(newPhrase[itemIndex], phrase[++i]);        
+        for (int j=i+1; phrase[j]!=NULL; j++) {
+          if (strcmp(phrase[j],"\"")==0) {
+            i=j;
+            itemIndex++;
+            break;
+          } else {
+            strcat(newPhrase[itemIndex], " ");
+            strcat(newPhrase[itemIndex], phrase[j]);
+          }
+          if (phrase[j+1]==NULL) {
+            printf("You have forgotten one of these \"\n");
+            return NULL;
+          }
+        }
+      } else return NULL;
+    } else {
+      newPhrase[itemIndex]=malloc(200);
+      strcpy(newPhrase[itemIndex], phrase[i]);
+      itemIndex++;
+    }
+  }
+
+  newPhrase[itemIndex]=NULL;
+  return newPhrase;
 }
