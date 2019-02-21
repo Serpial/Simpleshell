@@ -74,7 +74,7 @@ void executeInstruction (char **phrase, char* instruction,
 
   phrase = joinSubPhrase(parseInput(instruction));
     
-  if (phrase[0]!=NULL){
+  if (phrase!=NULL && phrase[0]!=NULL){
     if (strcmp(phrase[0], "getpath")==0) {
       getPath(phrase);
     } else if (strcmp(phrase[0], "setpath")==0) {
