@@ -297,12 +297,9 @@ char** joinSubPhrase (char **phrase) {
             strcat(newPhrase[itemIndex], " ");
             strcat(newPhrase[itemIndex], phrase[j]);
           }
-          if (phrase[j+1]==NULL) {
-            printf("You have forgotten one of these \"\n");
-            return NULL;
-          }
+          if (phrase[j+1]==NULL) { return NULL; }
         }
-      } else return NULL;
+      } else { return NULL; }
     } else {
       newPhrase[itemIndex]=malloc(200);
       strcpy(newPhrase[itemIndex], phrase[i]);
