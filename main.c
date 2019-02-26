@@ -8,9 +8,9 @@
 /* Definitions */
 #define PATHSIZE 200        // Maximum number of chars in currentDir
 #define MAX_INSTR 512       // Maximum number of chars per phrase
-#define MAX_HISTORY_SIZE 20 //Maximum number of instructions stored 
-/* Prototypes */
+#define MAX_HISTORY_SIZE 20 // Maximum number of instructions stored 
 
+/* Prototypes */
 char* buildPrefix(char* directory);
 void parseInput(char* instruction, char* phrase[MAX_INSTR/2]);
 void emptyPhrase(char* phrase[MAX_INSTR/2]);
@@ -18,17 +18,12 @@ void executeExternal(char* phrase[MAX_INSTR/2]);
 void getPath(char* phrase[MAX_INSTR/2]);
 void setPath(char* phrase[MAX_INSTR/2]);
 void changeDirectory(char **arguments);
-void exitProgram(int exitCode, char originalPath[500]);
-void writeHistory(char *instruction, char  *history[MAX_HISTORY_SIZE], int *rear, char originalPath[500]);
+void exitProgram(int exitCode, char originalPath[500], char **history, int rear);
+void writeHistory(char  *history[MAX_HISTORY_SIZE], int rear);
 void readHistory(char  *history[MAX_HISTORY_SIZE], int *rear);
-void printHistory(char *history[MAX_HISTORY_SIZE], int *rear);
-void executeInstruction (char *phrase[MAX_INSTR/2], char* instruction,
-                         char *history[21], int *rear, char originalPath[500]);
-void singleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
-                        char *history[21], char originalPath[500]);
-void doubleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
-                        char *history[21], char originalPath[500]);
-// void printHistory(char *history[MAX_HISTORY_SIZE]);
+void printHistory(char *history[MAX_HISTORY_SIZE], int rear);
+void executeInstruction (char *phrase[MAX_INSTR/2], char **history, int rear, char originalPath[500]);
+void recallHistory (char *phrase[MAX_INSTR/2], char **history, int rear, char originalPath[500]);
 
 /* Main Function */
 int main() {
@@ -37,24 +32,24 @@ int main() {
   char *phrase[MAX_INSTR/2]; // Array of components of the instruction
   char originalPath[500];
   char *history[MAX_HISTORY_SIZE];
-  int rear = 0;
-  //char *histArray[MAX_HISTORY_SIZE];
+  int rear=0;
 
-  
   //iniitialises and allocates memory
-  for (int i = 0; i <= MAX_HISTORY_SIZE; i++) {
+  for (int i = 0; i < MAX_HISTORY_SIZE; i++) {
     history[i] = (char * ) malloc(512);
     strcpy(history[i], "\0");
   }
 
-
+  
+  
   // Use the default home directory as the default path
   strcpy(currentDir, getenv("HOME"));
   strcpy(originalPath, getenv("PATH"));
-
   // Sets current directory to current diretory
   chdir(currentDir);
-
+  // Reads history from file
+  readHistory(history, &rear);
+  
   for(;;) {
     memset(instruction,0,strlen(instruction));
     emptyPhrase(phrase);
@@ -62,11 +57,10 @@ int main() {
     getcwd(currentDir, sizeof(currentDir));
     printf("%s",buildPrefix(currentDir));
 
-    // get user and input and get rid of trailing control characters
-    //    inserted by fgets also exits on Ctrl-D
+    // get user and input
     if (fgets(instruction, sizeof instruction, stdin)==NULL){
       printf("\n");
-      exitProgram(0, originalPath);
+      exitProgram(0, originalPath, history, rear);
     }
     // fgets causes a \n to be placed on the back of input.
     size_t len = strlen(instruction);
@@ -75,33 +69,35 @@ int main() {
       instruction[len-1] = '\0';
     }
 
-    //add command to histroy 
-    writeHistory(instruction, history, &rear, originalPath);
+    //printf("here:%s\n", history[rear-1]);
     // Run the given command
-    executeInstruction(phrase, instruction, history, &rear, originalPath);
+    parseInput(instruction, phrase);
+    
+    // Put instruction in to history if it isn't a fetch from history command
+    if (phrase[0]!=NULL && strcmp(phrase[0], "!")!=0) {
+      strcpy(history[rear], instruction);
+      rear = (1+rear) % MAX_HISTORY_SIZE;
+    }
+    executeInstruction(phrase, history, rear, originalPath);
   }
 }
 
-void executeInstruction (char *phrase[MAX_INSTR/2], char* instruction,
-                         char *history[21], int *rear, char originalPath[500]) {
+void executeInstruction (char *phrase[MAX_INSTR/2], char **history, int rear, char originalPath[500]) {
 
-  parseInput(instruction, phrase);
-
-  if (phrase[0]!=NULL){
+  
+  if (phrase[0]!=NULL){    
     if (strcmp(phrase[0], "getpath")==0) {
       getPath(phrase);
     } else if (strcmp(phrase[0], "setpath")==0) {
       setPath(phrase);
-    } else if (strcmp(instruction, "!!")==0) {
-      doubleExclamation(phrase, instruction, history, originalPath);
     } else if (strcmp(phrase[0], "!")==0) {
-      singleExclamation(phrase, instruction, history, originalPath);      
+      recallHistory(phrase, history, rear, originalPath);      
     } else if (strcmp(phrase[0], "history")==0) {
       printHistory(history, rear);
     } else if (strcmp(phrase[0], "cd")==0) {
       changeDirectory(phrase);
-    } else if (strcmp(instruction, "exit")==0) {
-      exitProgram(0, originalPath);
+    } else if (strcmp(phrase[0], "exit")==0) {
+      exitProgram(0, originalPath, history, rear);
     } else {
       executeExternal(phrase);
     }
@@ -178,7 +174,7 @@ void parseInput(char* instruction, char* phrase[MAX_INSTR/2]) {
       // then added it to a member of the phrase
       if (instruction[counter]!=' ') {
         if (letterIdx==0) {
-          phrase[wordIdx]=malloc(100);
+          phrase[wordIdx]= (char *) malloc(100);
         }
         phrase[wordIdx][letterIdx++]=instruction[counter];
         if (instruction[counter+1]==' '||instruction[counter+1]=='\0') {
@@ -264,87 +260,109 @@ void getPath(char* phrase[MAX_INSTR/2]){
 }
 
 /* Need further implementation */
-void singleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
-                        char *history[21], char originalPath[500]) {
-  int lineNum;
-  int len;
-  
-  if (phrase[2]!=NULL){
-    printf("Too many arguments\n");
-  } else if (phrase[1]==NULL){
-    printf("Too few arguments\n");
-  } else {
-    printf("%s\n", instruction);
-    len = strlen(phrase[1]);
-    for (int i=0; i<len; i++) {
-      lineNum = lineNum * 10 + (phrase[1][i] - '0');
-    }
-    if (lineNum > 20 || lineNum <1) {
-      executeInstruction(phrase, history[lineNum], history, NULL, originalPath);
+void recallHistory (char *phrase[MAX_INSTR/2], char **history, int rear, char originalPath[500]) {
+  int lineNum=0;
+
+  if (phrase[1]!=NULL) {
+    if (strcmp(phrase[1],"!")==0 && phrase[2]==NULL) {
+      lineNum = (rear-1==0?MAX_HISTORY_SIZE-1:rear-1);
+      printf("%s\n", history[lineNum]);
+      parseInput(history[lineNum], phrase);
+      executeInstruction(phrase, history, rear, originalPath);
+      return;
     } else {
-      printf("invalid item : %i\n", lineNum);
+      lineNum = strtol(phrase[1],NULL,0);
+      if (lineNum!=0 && lineNum<=MAX_HISTORY_SIZE && lineNum>=-MAX_HISTORY_SIZE) {
+        if (lineNum<0) {  // go down from rear
+          lineNum = (rear+lineNum-1)<0?
+            (MAX_HISTORY_SIZE-1)+(rear+lineNum)+1: lineNum+rear;
+          printf("%s\n", history[lineNum]);
+          parseInput(history[lineNum], phrase);
+          executeInstruction(phrase, history, rear, originalPath);
+          return;
+        } else {  // pick a spot
+          lineNum = (rear+lineNum-1)%MAX_HISTORY_SIZE;
+          printf("%s\n", history[lineNum]);
+          parseInput(history[lineNum], phrase);
+          executeInstruction(phrase, history, rear, originalPath);
+          return;
+        }
+      } else {
+        printf("Incorrect Entry\n");
+      }
     }
   }
-}
-
-/* Need further implementation */
-void doubleExclamation (char *phrase[MAX_INSTR/2], char* instruction,
-                        char *history[21], char originalPath[500]) {
-  int counter;
-  if (phrase[1]!=NULL){
-    printf("%s\n", instruction);
-    executeInstruction(phrase, history[counter-1], history, NULL, originalPath);
-  } else {
-    printf("Too few arguments\n");
+  if (phrase[2]!=NULL) {
+    printf("You have entered too many arguments\n");
+    return;
   }
 }
 
 
-void writeHistory(char *instruction, char *history[MAX_HISTORY_SIZE], int *rear,char originalPath[500]){
-  strcpy(history[* rear], instruction);
-  * rear = (* rear+1)%MAX_HISTORY_SIZE;
+void writeHistory(char *history[MAX_HISTORY_SIZE], int rear) {
   FILE *fp;
-  fp= fopen("./.hist_list","a");
+  int i;
+  char fileLocation[MAX_INSTR]="";
+  
+  strcpy(fileLocation, getenv("HOME"));
+  strcat(fileLocation, "/.hist_list");
+  fp= fopen(fileLocation,"w");
+  
   if (fp == NULL){
-    printf("Could not open file");
-    exitProgram(1,originalPath);
+    printf("Could not open history file\n");
+    return;
   }
-  fprintf(fp,"%s\n", instruction);
-}
 
+  i=rear;
+  do {
+    if (strcmp(history[i], "\0")!=0){
+      fprintf(fp,"%s\n", history[i]);
+    }
+    i=(i+1)%MAX_HISTORY_SIZE;
+  } while (i!=rear);
+}
 
 void readHistory(char *history[MAX_HISTORY_SIZE], int *rear){
   FILE *fp;
-  char x;
-  fp = fopen("./.hist_list","a+");
-  //Reading
-  x = getc(fp);
-  while (x!= EOF){
-    putchar(x);
-    x = getc(fp);
-    strcpy(history[*rear], &x);
-    * rear = (* rear+1)%MAX_HISTORY_SIZE;
-  }
-  fclose(fp);
+  int numInstr=0;
+  char newInstruction[MAX_INSTR]="";
+  char fileLocation[MAX_INSTR]="";
+  size_t len;
 
+  strcpy(fileLocation, getenv("HOME"));
+  strcat(fileLocation, "/.hist_list");
+  
+  fp = fopen(fileLocation,"a+");
+  
+  while(fgets(newInstruction, sizeof(newInstruction), fp)!=NULL && numInstr<20) {
+    len = strlen(newInstruction);
+    if (len && (newInstruction[len-1] == '\n')) {
+      newInstruction[len-1] = '\0';
+    }
+    strcpy(history[numInstr++], newInstruction);
+  }  
+  *rear = numInstr==MAX_HISTORY_SIZE?0:numInstr;
+  fclose(fp);
 }
 
-/*prints 20 elemnets of history to the user */
-void printHistory(char *history[MAX_HISTORY_SIZE], int *rear){
+/*prints 20 elements of history to the user */
+void printHistory(char *history[MAX_HISTORY_SIZE], int rear){
   //set i to be a copy of rear to read in from most recent 
-  int i = *rear;
-  int historyIndex =1;
+  int i = rear;
+  int historyIndex=1;
   do {
-    if (strcmp(history[i], "\0") != 0) //only show elements in array that arent null
+    //only show elements in array that arent null
+    if (strcmp(history[i], "\0") != 0) 
      printf("%i. %s \n", historyIndex++, history[i]); //print history
-     i = (i+1)%MAX_HISTORY_SIZE; //update i to ensure its circular
+    i = (1+i)%MAX_HISTORY_SIZE; //update i to ensure its circular
    } 
-   while ( i != *rear);
+   while ( i != rear);
 }
 
 /* Ran on the way out */
-void exitProgram(int exitCode, char originalPath[500]) {
+void exitProgram(int exitCode, char originalPath[500], char **history, int rear) {
   // Reset the path to what it was before the session was opened
   setenv("PATH", originalPath, 1);
+  writeHistory(history, rear);
   exit(exitCode);
 }
