@@ -251,29 +251,57 @@ void getPath(char **phrase){
 }
 
 
+int howMany(char **history) {
+  int counter=0;
+  int index=0;
+  while(strcmp(history[index], "\0") && index!=MAX_HISTORY_SIZE+1) {
+    counter++;
+    index++;
+  }
+  return counter;
+}
+
+
 void recallHistory (char **phrase, char **history, int rear, char originalPath[500]) {
   int lineNum=0;
 
   if (phrase[1]!=NULL) {
     if (strcmp(phrase[1],"!")==0 && phrase[2]==NULL) {
+      
       lineNum = (rear==0?MAX_HISTORY_SIZE-1:rear-1);
       printf("%s\n", history[lineNum]);
       phrase = parseInput(history[lineNum]);
       executeInstruction(phrase, history, rear, originalPath);
       return;
+
+      
     } else {
       lineNum = strtol(phrase[1],NULL,0);
       if (lineNum!=0 && lineNum<=MAX_HISTORY_SIZE && lineNum>=-MAX_HISTORY_SIZE) {
         if (lineNum<0) {  // go down from rear
+          
+          
           lineNum = (rear+lineNum-1)<0?
             (MAX_HISTORY_SIZE-1)+(rear+lineNum): lineNum+rear;
+         
+          
+
           lineNum++;
+
+
+
+          
           printf("%s\n", history[lineNum]);
           phrase = parseInput(history[lineNum]);
           executeInstruction(phrase, history, rear, originalPath);
           return;
-        } else {  // pick a spot
-          lineNum = (rear+lineNum-1)%MAX_HISTORY_SIZE;
+        } else {  // pick a spot          
+          if (howMany(history)==20) {
+            lineNum = (rear+lineNum-1)%MAX_HISTORY_SIZE;
+          } else {
+            lineNum--;
+          }
+          
           printf("%s\n", history[lineNum]);
           phrase = parseInput(history[lineNum]);
           executeInstruction(phrase, history, rear, originalPath);
