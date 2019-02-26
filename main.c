@@ -256,7 +256,7 @@ void recallHistory (char **phrase, char **history, int rear, char originalPath[5
 
   if (phrase[1]!=NULL) {
     if (strcmp(phrase[1],"!")==0 && phrase[2]==NULL) {
-      lineNum = (rear-1==0?MAX_HISTORY_SIZE-1:rear-1);
+      lineNum = (rear==0?MAX_HISTORY_SIZE-1:rear-1);
       printf("%s\n", history[lineNum]);
       phrase = parseInput(history[lineNum]);
       executeInstruction(phrase, history, rear, originalPath);
