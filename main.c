@@ -213,6 +213,8 @@ void executeExternal(char **phrase){
     // use execvp to execute the command and detect errors    
     if (execvp(phrase[0], phrase)== -1){
       printf(" %s: we dont recognise this command\n", phrase[0]);
+      _exit(1);
+     // perror("We did not recognise this command");
     }    
   }
   else { // in the parent process 
