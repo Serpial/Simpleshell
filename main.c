@@ -21,7 +21,7 @@ void changeDirectory(char **arguments);
 void exitProgram(int exitCode, char originalPath[500], char **history, int rear);
 void writeHistory(char **history, int rear);
 void readHistory(char **history, int *rear);
-void printHistory(char **history, int rear);
+void printHistory(char **phrase, char **history, int rear);
 void executeInstruction (char **phrase, char **history, int rear, char originalPath[500]);
 void recallHistory (char **phrase, char **history, int rear, char originalPath[500]);
 
@@ -91,7 +91,7 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
         } else if (strcmp(phrase[0], "!")==0) {
             recallHistory(phrase, history, rear, originalPath);      
         } else if (strcmp(phrase[0], "history")==0) {
-            printHistory(history, rear);
+            printHistory(phrase, history, rear);
         } else if (strcmp(phrase[0], "cd")==0) {
             changeDirectory(phrase);
         } else if (strcmp(phrase[0], "exit")==0) {
@@ -206,7 +206,7 @@ void executeExternal(char **phrase){
     pid = fork(); //duplicates process 
 
     if (pid == -1){ // fork is less than zero and so an error has occured
-        perror("Error has occurred, fork has failed");
+        perror("Error: Fork has failed");
     }
 
     else if (pid == 0){ // in the child and so can execute the command 
@@ -229,9 +229,9 @@ void setPath(char **phrase) {
     char tempPath[500];
 
     if (phrase[2]!=NULL){
-        printf("Too many arguments\n");
+        printf("Error: Too many arguments\n");
     } else if (phrase[1]==NULL){
-        printf("Too few arguments\n");
+        printf("Error: Too few arguments\n");
     } else {
         strcpy(tempPath, phrase[1]);
         strcat(tempPath, ":");
@@ -244,7 +244,7 @@ void setPath(char **phrase) {
  */
 void getPath(char **phrase){
     if (phrase[1]!=NULL){
-        printf("Too many arguments\n");
+        printf("Error: Too many arguments\n");
     } else {
         printf("%s\n", getenv("PATH"));
     }
@@ -298,12 +298,16 @@ void recallHistory (char **phrase, char **history, int rear, char originalPath[5
                     return;
                 }
             } else {
-                printf("Incorrect Entry\n");
+                if (lineNum!=0) {
+                    printf("Error: You have entered too large a value\n");
+                } else {
+                    printf("Error: Cannot Enter 0\n")
+                }
             }
         }
     }
     if (phrase[2]!=NULL) {
-        printf("You have entered too many arguments\n");
+        printf("Error: You have entered too many arguments\n");
         return;
     }
 }
@@ -319,7 +323,7 @@ void writeHistory(char **history, int rear) {
     fp= fopen(fileLocation,"w");
   
     if (fp == NULL){
-        printf("Could not open history file\n");
+        printf("Error: Could not open history file\n");
         return;
     }
 
@@ -356,17 +360,21 @@ void readHistory(char **history, int *rear){
 }
 
 /*prints 20 elements of history to the user */
-void printHistory(char **history, int rear){
+void printHistory(char **phrase, char **history, int rear){
     //set i to be a copy of rear to read in from most recent 
     int i = rear;
     int historyIndex=1;
-    do {
-        //only show elements in array that arent null
-        if (strcmp(history[i], "\0") != 0) 
-            printf("%i. %s \n", historyIndex++, history[i]); //print history
-        i = (1+i)%MAX_HISTORY_SIZE; //update i to ensure its circular
-    } 
-    while ( i != rear);
+    if (phrase[1]==NULL) {
+        do {
+            //only show elements in array that arent null
+            if (strcmp(history[i], "\0") != 0) 
+                printf("%i. %s \n", historyIndex++, history[i]); //print history
+            i = (1+i)%MAX_HISTORY_SIZE; //update i to ensure its circular
+        } 
+        while ( i != rear);
+    } else {
+        printf("Error: Too many arguments\n");
+    }
 }
 
 /* Ran on the way out */
