@@ -119,9 +119,12 @@ char* buildPrefix(char* directory) {
         strcpy(newDir, directory);
     }
   
-    strcpy(prefix, getenv("USER"));
+    strcpy(prefix, "\x1b[34m"); // Blue   
+    strcat(prefix, getenv("USER"));
     strcat(prefix, ":");
+    strcat(prefix, "\x1b[32m"); // Green
     strcat(prefix, newDir);
+    strcat(prefix, "\x1b[0m"); // Reset Colour
     strcat(prefix, "$ ");
 
     free(temp);
@@ -301,7 +304,7 @@ void recallHistory (char **phrase, char **history, int rear, char originalPath[5
                 if (lineNum!=0) {
                     printf("Error: You have entered too large a value\n");
                 } else {
-                    printf("Error: Cannot Enter 0\n")
+                    printf("Error: Cannot Enter 0\n");
                 }
             }
         }
