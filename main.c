@@ -30,22 +30,22 @@ void recallHistory (char **phrase, char **history, int rear, char originalPath[5
 /* Main Function */
 int main() {
 
-char currentDir[PATHSIZE]; // Current Directory the user is in
-char instruction[MAX_INSTR]; // Pre-parsed instruction
-char **phrase; // Array of components of the instruction
-char originalPath[500]; // User's Input Path
-char *history[MAX_HISTORY_SIZE]; // Instructions the user has entered
-int rear = 0; // A constant used in the history function.
+    char currentDir[PATHSIZE]; // Current Directory the user is in
+    char instruction[MAX_INSTR]; // Pre-parsed instruction
+    char **phrase; // Array of components of the instruction
+    char originalPath[500]; // User's Input Path
+    char *history[MAX_HISTORY_SIZE]; // Instructions the user has entered
+    int rear = 0; // A constant used in the history function.
 
 
-/* Stage 1: Prompt user, and Read and parse user input, Exit shell and Initialise the
-working directory. */
+    /* Stage 1: Prompt user, and Read and parse user input, Exit shell and Initialise the
+       working directory. */
 
     // Initialises and Allocates Memory
     for (int i = 0; i < MAX_HISTORY_SIZE; i++) {
         history[i] = (char * ) malloc(512);
         strcpy(history[i], "\0");
-		}
+    }
 
     // Uses the Default Home Directory as the Default Path.
     strcpy(currentDir, getenv("HOME"));
@@ -128,7 +128,7 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
 
 /* Stage 3: Setting the current directory to Home. */
 
-    char* buildPrefix(char* directory) {
+char* buildPrefix(char* directory) {
     static char prefix[PATHSIZE];
     char *name, *temp = malloc(PATHSIZE);
     static char newDir[PATHSIZE];
@@ -157,9 +157,9 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
 }
 
 
-    /* Stage 4: Changing Directories. */
+/* Stage 4: Changing Directories. */
 	
-    void changeDirectory(char **arguments) {
+void changeDirectory(char **arguments) {
 
     char *firstArgument = arguments[1];
 
@@ -188,13 +188,13 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
             if(chdir(firstArgument) == -1) {
                 perror(firstArgument);
             }
-
-            }
+            
         }
     }
+}
 
 	
- // Separate the users instruction into an array of actionable components.
+// Separate the users instruction into an array of actionable components.
 char** parseInput(char* instruction) {
     char specialChar[] = "!|><&;\"";
     int counter=0, wordIdx=0, letterIdx=0;
@@ -360,7 +360,7 @@ void recallHistory (char **phrase, char **history, int rear, char originalPath[5
 }
 
 /*Stage 5: Adding commands to history, invoking commands from history and
-printing the history. */
+  printing the history. */
 
 void writeHistory(char **history, int rear) {
     FILE *fp;
