@@ -10,6 +10,7 @@
 #define MAX_INSTR 512       // Maximum number of chars per phrase
 #define MAX_HISTORY_SIZE 20 // Maximum number of instructions stored 
 #define MAX_ALIAS_SIZE 20
+
 /* Prototypes */
 char* buildPrefix(char* directory);
 char** parseInput(char* instruction);
@@ -18,7 +19,7 @@ void executeExternal(char **phrase);
 void getPath(char **phrase);
 void setPath(char **phrase);
 void changeDirectory(char **arguments);
-void exitProgram(int exitCode, char originalPath[500], char **history, int rear);
+void exitProgram(int exitCode, char originalPath[500], char **history, int rear, char *alias[MAX_ALIAS_SIZE][2]);
 void writeHistory(char **history, int rear);
 void readHistory(char **history, int *rear);
 void printHistory(char **history, int rear);
@@ -53,7 +54,7 @@ void readAliases () {
     fclose(fp);
 }
 
-void writeAliases(char ***alias) {
+void writeAliases(char *alias[MAX_ALIAS_SIZE][2]) {
     FILE *fp;
     char fileLocation[MAX_INSTR]="";
     int aliasCounter = 0;
@@ -69,6 +70,7 @@ void writeAliases(char ***alias) {
 
     while (aliasCounter<MAX_ALIAS_SIZE && alias[aliasCounter][1]!=NULL) {
         fprintf(fp, "%s|%s\n", alias[aliasCounter][0], alias[aliasCounter][1]);
+        aliasCounter++;
     }
 }
 
@@ -104,7 +106,7 @@ int main() {
         //    inserted by fgets also exits on Ctrl-D
         if (fgets(instruction, sizeof instruction, stdin)==NULL){
             printf("\n");
-            exitProgram(0, originalPath, history, rear);
+            exitProgram(0, originalPath, history, rear, alias);
         }
         // fgets causes a \n to be placed on the back of input.
         size_t len = strlen(instruction);
@@ -143,7 +145,7 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
         } else if (strcmp(phrase[0], "cd")==0) {
             changeDirectory(phrase);
         } else if (strcmp(phrase[0], "exit")==0) {
-            exitProgram(0, originalPath, history, rear);
+            exitProgram(0, originalPath, history, rear, alias);
         } else if((strcmp(phrase[0], "alias")==0) && phrase[1]==NULL){
             printAlias(alias);
         }
@@ -431,11 +433,11 @@ void printHistory(char **history, int rear){
 }
 
 /* Ran on the way out */
-void exitProgram(int exitCode, char originalPath[500], char **history, int rear, char ***alias) {
+void exitProgram(int exitCode, char originalPath[500], char **history, int rear, char *alias[MAX_ALIAS_SIZE][2]) {
     // Reset the path to what it was before the session was opened
     setenv("PATH", originalPath, 1);
     writeHistory(history, rear);
-    writeAliases(alias;)
+    writeAliases(alias);
     exit(exitCode);
 }
 
