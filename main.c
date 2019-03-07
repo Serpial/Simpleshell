@@ -29,48 +29,8 @@ void printAlias(char *alias[MAX_ALIAS_SIZE][2]);
 void addAlias(char**phrase, char *alias[MAX_ALIAS_SIZE][2]);
 void removeAlias(char **phrase, char *alias[MAX_ALIAS_SIZE][2]);
 void invokeAlias(char instruction[MAX_INSTR], char *alias[MAX_ALIAS_SIZE][2]);
-void readAliases (char *alias[MAX_ALIAS_SIZE][2]) {
-    FILE *fp;
-    char fileLocation[MAX_INSTR]="";
-    char joinedAlias[MAX_INSTR]="";
-    int numAlias=0, len, letterIndex, pastBar = 0;
-    
-    strcpy(fileLocation, getenv("HOME"));
-    strcat(fileLocation, "/.aliases");
-    fp = fopen(fileLocation, "a+");
-    
-    while(fgets(joinedAlias, sizeof(joinedAlias), fp)!=NULL && numAlias<MAX_ALIAS_SIZE) {
-        len = strlen(joinedAlias);
-        letterIndex=0;
-        if (len && (joinedAlias[len-1]=='\n')) {
-            joinedAlias[len-1] = '\0';   
-        }
-        
-        addAlias(parseInput(joinedAlias), alias);
-    }
-    fclose(fp);
-}
-
-void writeAliases(char *alias[MAX_ALIAS_SIZE][2]) {
-    FILE *fp;
-    char fileLocation[MAX_INSTR]="";
-    int aliasCounter = 0;
-    
-    strcpy(fileLocation, getenv("HOME"));
-    strcat(fileLocation, "/.aliases");
-    fp = fopen(fileLocation, "w");
-
-    if (fp == NULL) {
-        printf("Could not open history file\n");
-        return;
-    }
-    
-    while (aliasCounter<MAX_ALIAS_SIZE && alias[aliasCounter][1]!=NULL) {
-        printf("%s|%s\n", alias[aliasCounter][0], alias[aliasCounter][1]);
-        fprintf(fp, "%s|%s\n", alias[aliasCounter][0], alias[aliasCounter][1]);
-        aliasCounter++;
-    }
-}
+void readAliases (char *alias[MAX_ALIAS_SIZE][2]);
+void writeAliases(char *alias[MAX_ALIAS_SIZE][2]);
 
 /* Main Function */
 int main() {
@@ -598,5 +558,61 @@ void invokeAlias(char instruction[MAX_INSTR], char *alias[MAX_ALIAS_SIZE][2]){
                 strcpy(instruction, alias[index][1]);
             }
         }
+    }
+}
+
+void readAliases (char *alias[MAX_ALIAS_SIZE][2]) {
+    FILE *fp;
+    char fileLocation[MAX_INSTR]="";
+    char joinedAlias[MAX_INSTR]="";
+    int numAlias=0, len, letterIndex, pastBar = 0;
+    
+    strcpy(fileLocation, getenv("HOME"));
+    strcat(fileLocation, "/.aliases");
+    fp = fopen(fileLocation, "a+");
+
+    char temp[MAX_INSTR];
+    
+    while(fgets(joinedAlias, sizeof(joinedAlias), fp)!=NULL && numAlias<MAX_ALIAS_SIZE) {
+        len = strlen(joinedAlias);
+        letterIndex=0;
+        if (len && (joinedAlias[len-1]=='\n')) {
+            joinedAlias[len-1] = '\0';   
+        }
+
+        strcpy(temp, joinedAlias);
+        strcpy(joinedAlias, "alias ");
+        strcat(joinedAlias, temp);
+
+        for (int i=0; i<strlen(joinedAlias); i++) {
+            if (joinedAlias[i]=='|') {
+                joinedAlias[i]= ' ';
+                break;
+            }
+        }
+        
+        addAlias(parseInput(joinedAlias), alias);
+    }
+    fclose(fp);
+}
+
+void writeAliases(char *alias[MAX_ALIAS_SIZE][2]) {
+    FILE *fp;
+    char fileLocation[MAX_INSTR]="";
+    int aliasCounter = 0;
+    
+    strcpy(fileLocation, getenv("HOME"));
+    strcat(fileLocation, "/.aliases");
+    fp = fopen(fileLocation, "w");
+
+    if (fp == NULL) {
+        printf("Could not open history file\n");
+        return;
+    }
+    
+    while (aliasCounter<MAX_ALIAS_SIZE && alias[aliasCounter][1]!=NULL) {
+        printf("%s|%s\n", alias[aliasCounter][0], alias[aliasCounter][1]);
+        fprintf(fp, "%s|%s\n", alias[aliasCounter][0], alias[aliasCounter][1]);
+        aliasCounter++;
     }
 }
