@@ -29,28 +29,25 @@ void printAlias(char *alias[MAX_ALIAS_SIZE][2]);
 void addAlias(char**phrase, char *alias[MAX_ALIAS_SIZE][2]);
 void removeAlias(char **phrase, char *alias[MAX_ALIAS_SIZE][2]);
 void invokeAlias(char instruction[MAX_INSTR], char *alias[MAX_ALIAS_SIZE][2]);
-void readAliases () {
+void readAliases (char *alias[MAX_ALIAS_SIZE][2]) {
     FILE *fp;
     char fileLocation[MAX_INSTR]="";
-    char newAlias[MAX_INSTR]="";
-    int numAlias=0, len;
-    static char newAliasList[MAX_ALIAS_SIZE][2];
+    char joinedAlias[MAX_INSTR]="";
+    int numAlias=0, len, letterIndex, pastBar = 0;
     
     strcpy(fileLocation, getenv("HOME"));
     strcat(fileLocation, "/.aliases");
     fp = fopen(fileLocation, "a+");
-
-    while(fgets(newAlias, sizeof(newAlias), fp)!=NULL && numAlias<MAX_ALIAS_SIZE) {
-        len = strlen(newAlias);
-        if (len && (newAlias[len-1]=='\n')) {
-            newAlias[len-1] = '\0';
-
-            
-            
+    
+    while(fgets(joinedAlias, sizeof(joinedAlias), fp)!=NULL && numAlias<MAX_ALIAS_SIZE) {
+        len = strlen(joinedAlias);
+        letterIndex=0;
+        if (len && (joinedAlias[len-1]=='\n')) {
+            joinedAlias[len-1] = '\0';   
         }
         
+        addAlias(parseInput(joinedAlias), alias);
     }
-    
     fclose(fp);
 }
 
@@ -67,8 +64,9 @@ void writeAliases(char *alias[MAX_ALIAS_SIZE][2]) {
         printf("Could not open history file\n");
         return;
     }
-
+    
     while (aliasCounter<MAX_ALIAS_SIZE && alias[aliasCounter][1]!=NULL) {
+        printf("%s|%s\n", alias[aliasCounter][0], alias[aliasCounter][1]);
         fprintf(fp, "%s|%s\n", alias[aliasCounter][0], alias[aliasCounter][1]);
         aliasCounter++;
     }
@@ -97,6 +95,7 @@ int main() {
     chdir(currentDir);
     // Reads history from file
     readHistory(history, &rear);
+    readAliases(alias);
   
     for(;;) {
         getcwd(currentDir, sizeof(currentDir));
@@ -508,7 +507,7 @@ void addAlias(char**phrase, char *alias[MAX_ALIAS_SIZE][2]){
         return;
     }
     
-    //find how mnany arguments there are 
+    //find how many arguments there are 
     while(phrase[index] != NULL){
         index++;
     }
@@ -601,6 +600,3 @@ void invokeAlias(char instruction[MAX_INSTR], char *alias[MAX_ALIAS_SIZE][2]){
         }
     }
 }
-
-
-
