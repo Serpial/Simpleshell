@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -90,7 +92,7 @@ int main() {
 
 
 void executeInstruction (char **phrase, char **history, int rear, char originalPath[500], char *alias[MAX_ALIAS_SIZE][2]) {
-
+    
   
     if (phrase[0]!=NULL){
         if (strcmp(phrase[0], "getpath")==0) {
@@ -102,21 +104,17 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
         } else if (strcmp(phrase[0], "history")==0) {
             printHistory(history, rear);
         } else if (strcmp(phrase[0], "cd")==0) {
-            changeDirectory(phrase);
+            changeDirectory(joinSubPhrase(phrase));
         } else if (strcmp(phrase[0], "exit")==0) {
             exitProgram(0, originalPath, history, rear, alias);
         } else if((strcmp(phrase[0], "alias")==0) && phrase[1]==NULL){
             printAlias(alias);
-        }
-        else if((strcmp(phrase[0], "alias")==0) && phrase[1]!=NULL){
+        } else if((strcmp(phrase[0], "alias")==0) && phrase[1]!=NULL){
             addAlias(phrase, alias);
-        }
-        else if(strcmp(phrase[0], "unalias")==0){
+        } else if(strcmp(phrase[0], "unalias")==0){
             removeAlias(phrase, alias);
-        }
-
-        else {
-            executeExternal(phrase);
+        } else {
+            executeExternal(joinSubPhrase(phrase));
         }
     }
 }
@@ -290,7 +288,7 @@ void recallHistory (char **phrase, char **history, int rear, char originalPath[5
             lineNum = (rear==0?MAX_HISTORY_SIZE-1:rear-1);
             printf("%s\n", history[lineNum]);
             phrase = parseInput(history[lineNum]);
-            executeInstruction(phrase, history, rear, originalPath, alias);
+            executeInstruction(joinSubPhrase(phrase), history, rear, originalPath, alias);
             return;
 
       
@@ -305,7 +303,7 @@ void recallHistory (char **phrase, char **history, int rear, char originalPath[5
          
                     printf("%s\n", history[lineNum]);
                     phrase = parseInput(history[lineNum]);
-                    executeInstruction(phrase, history, rear, originalPath, alias);
+                    executeInstruction(joinSubPhrase(phrase), history, rear, originalPath, alias);
                     return;
                 } else {  // pick a spot          
                     if (howMany(history)==20) {
@@ -316,7 +314,7 @@ void recallHistory (char **phrase, char **history, int rear, char originalPath[5
           
                     printf("%s\n", history[lineNum]);
                     phrase = parseInput(history[lineNum]);
-                    executeInstruction(phrase, history, rear, originalPath, alias);
+                    executeInstruction(joinSubPhrase(phrase), history, rear, originalPath, alias);
                     return;
                 }
             } else {
@@ -457,54 +455,55 @@ void printAlias(char *alias[MAX_ALIAS_SIZE][2]){
 }
 
 void addAlias(char**phrase, char *alias[MAX_ALIAS_SIZE][2]){
-    char command [512] = " ";
-    int index = 2;
-    int j;
-    int found = 0;
-    
-    if (phrase[1] == NULL){
-        printf("Error: Too few arguments");
-        return;
-    }
-    
-    //find how many arguments there are 
-    while(phrase[index] != NULL){
-        index++;
-    }
-
-    //makes command for alias
-    for (j =2; j<index; j++){
-        strcat(command, phrase[j]);
-        strcat(command, " ");
-    }
-
-    //counts null charatcers
-    int nullEntries=0;
-    for (index =0; index <MAX_ALIAS_SIZE; index++){
-        if (alias[index][0] == NULL){
-            nullEntries++; 
-        }
-    }
-
-    //checks list of previous alias 
-    for (j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
-        if (strcmp(phrase[1], alias[j][0]) == 0){
-            printf("overwriting previous alias\n");
-            alias[j][1] = strdup(command);   
-            found = 1;
-        }
-    }
-
-    //checks if alias is full if not adds
-    if(nullEntries == 0){
-        printf("no more space for alias");
-        //return;
-    }
-    else if (nullEntries != 0 && found == 0){
-        alias[MAX_ALIAS_SIZE-nullEntries][0] =strdup(phrase[1]);
-        alias[MAX_ALIAS_SIZE-nullEntries][1] =strdup(command);
-    }
+if (phrase[1] == NULL){
+    printf("Not enough arguments");
+    return;
 }
+
+//char name[] = " ";
+char command [512] = " ";
+int index = 2;
+int j;
+int found = 0;
+//find how mnany arguments there are 
+while(phrase[index] != NULL){
+ index++;
+}
+
+//makes command for alias
+for (j =2; j<index; j++){
+    strcat(command, phrase[j]);
+    strcat(command, " ");
+}
+
+//counts null charatcers
+int nullEntries=0;
+ for (index =0; index <MAX_ALIAS_SIZE; index++){
+    if (alias[index][0] == NULL){
+        nullEntries++; 
+    }
+ }
+
+ //checks list of previous alias 
+ for (j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
+    if (strcmp(phrase[1], alias[j][0]) == 0){
+        printf("overwriting previous alias\n");
+        alias[j][1] = strdup(command);   
+        found = 1;
+    }
+ }
+
+ //checks if alias is full if not adds
+ if(nullEntries == 0){
+    printf("no more space for alias");
+    //return;
+}
+ else if (nullEntries != 0 && found == 0){
+    alias[MAX_ALIAS_SIZE-nullEntries][0] =strdup(phrase[1]);
+    alias[MAX_ALIAS_SIZE-nullEntries][1] =strdup(command);
+ }
+}
+
 
 void removeAlias(char **phrase, char *alias[MAX_ALIAS_SIZE][2]){
     int found = 0;
@@ -564,14 +563,12 @@ void invokeAlias(char instruction[MAX_INSTR], char *alias[MAX_ALIAS_SIZE][2]){
 void readAliases (char *alias[MAX_ALIAS_SIZE][2]) {
     FILE *fp;
     char fileLocation[MAX_INSTR]="";
-    char joinedAlias[MAX_INSTR]="";
+    char joinedAlias[MAX_INSTR]="", temp[MAX_INSTR];
     int numAlias=0, len, letterIndex, pastBar = 0;
     
     strcpy(fileLocation, getenv("HOME"));
     strcat(fileLocation, "/.aliases");
     fp = fopen(fileLocation, "a+");
-
-    char temp[MAX_INSTR];
     
     while(fgets(joinedAlias, sizeof(joinedAlias), fp)!=NULL && numAlias<MAX_ALIAS_SIZE) {
         len = strlen(joinedAlias);
@@ -580,18 +577,22 @@ void readAliases (char *alias[MAX_ALIAS_SIZE][2]) {
             joinedAlias[len-1] = '\0';   
         }
 
-        strcpy(temp, joinedAlias);
-        strcpy(joinedAlias, "alias ");
-        strcat(joinedAlias, temp);
+        // Prepend alias so that addAlias can be used
+        if (strchr(joinedAlias, '|')!=NULL) {
+            strcpy(temp, joinedAlias);
+            strcpy(joinedAlias, "alias ");
+            strcat(joinedAlias, temp);
 
-        for (int i=0; i<strlen(joinedAlias); i++) {
-            if (joinedAlias[i]=='|') {
-                joinedAlias[i]= ' ';
-                break;
+            for (int i=0; i<strlen(joinedAlias); i++) {
+                if (joinedAlias[i]=='|') {
+                    joinedAlias[i]= ' ';
+                    break;
+                }
             }
+            addAlias(parseInput(joinedAlias), alias);
+        } else {
+            printf("Error: Unable to add alias:%s\n", joinedAlias);
         }
-        
-        addAlias(parseInput(joinedAlias), alias);
     }
     fclose(fp);
 }
@@ -611,7 +612,6 @@ void writeAliases(char *alias[MAX_ALIAS_SIZE][2]) {
     }
     
     while (aliasCounter<MAX_ALIAS_SIZE && alias[aliasCounter][1]!=NULL) {
-        printf("%s|%s\n", alias[aliasCounter][0], alias[aliasCounter][1]);
         fprintf(fp, "%s|%s\n", alias[aliasCounter][0], alias[aliasCounter][1]);
         aliasCounter++;
     }
