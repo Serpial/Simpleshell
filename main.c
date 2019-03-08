@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 /* Include Statements */
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +11,8 @@
 /* Definitions */
 #define PATHSIZE 200        // Maximum number of chars in currentDirectory
 #define MAX_INSTR 512       // Maximum number of chars per phrase
-#define MAX_HISTORY_SIZE 20 // Maximum number of instructions stored
+#define MAX_HISTORY_SIZE 20 // Maximum number of instructions stored 
+#define MAX_ALIAS_SIZE 20
 
 /* Prototypes */
 char* buildPrefix(char* directory);
@@ -19,13 +22,18 @@ void executeExternal(char **phrase);
 void getPath(char **phrase);
 void setPath(char **phrase);
 void changeDirectory(char **arguments);
-void exitProgram(int exitCode, char originalPath[500], char **history, int rear);
+void exitProgram(int exitCode, char originalPath[500], char **history, int rear, char *alias[MAX_ALIAS_SIZE][2]);
 void writeHistory(char **history, int rear);
 void readHistory(char **history, int *rear);
 void printHistory(char **history, int rear);
-void executeInstruction (char **phrase, char **history, int rear, char originalPath[500]);
-void recallHistory (char **phrase, char **history, int rear, char originalPath[500]);
-
+void executeInstruction (char **phrase, char **history, int rear, char originalPath[500], char *alias[MAX_ALIAS_SIZE][2]);
+void recallHistory (char **phrase, char **history, int rear, char originalPath[500], char *alias[MAX_ALIAS_SIZE][2]);
+void printAlias(char *alias[MAX_ALIAS_SIZE][2]);
+void addAlias(char**phrase, char *alias[MAX_ALIAS_SIZE][2]);
+void removeAlias(char **phrase, char *alias[MAX_ALIAS_SIZE][2]);
+void invokeAlias(char instruction[MAX_INSTR], char *alias[MAX_ALIAS_SIZE][2]);
+void readAliases (char *alias[MAX_ALIAS_SIZE][2]);
+void writeAliases(char *alias[MAX_ALIAS_SIZE][2]);
 
 /* Main Function */
 int main() {
@@ -35,6 +43,7 @@ int main() {
     char **phrase; // Array of components of the instruction
     char originalPath[500]; // User's Input Path
     char *history[MAX_HISTORY_SIZE]; // Instructions the user has entered
+    char *alias[MAX_ALIAS_SIZE][2] = {{NULL}};
     int rear = 0; // A constant used in the history function.
 
 
@@ -56,7 +65,8 @@ int main() {
 
     // Reads History from File.
     readHistory(history, &rear);
-
+    readAliases(alias);
+  
     for(;;) {
         getcwd(currentDir, sizeof(currentDir));
         printf("%s",buildPrefix(currentDir));
@@ -64,7 +74,7 @@ int main() {
         // Get user and input and get rid of trailing control character inserted by fgets.
         if (fgets(instruction, sizeof instruction, stdin)==NULL){
             printf("\n");
-            exitProgram(0, originalPath, history, rear);
+            exitProgram(0, originalPath, history, rear, alias);
         }
 
         // This changes the '\n' to '\0'.
@@ -73,7 +83,8 @@ int main() {
             instruction[len-1] = '\0';
         }
 
-        // Run the given command.
+        invokeAlias(instruction, alias);
+        // Run the given command
         phrase = parseInput(instruction);
 
         // Put instruction into history if it isn't a 'fetch from history' command.
@@ -83,45 +94,37 @@ int main() {
         }
 
         // Calls the executeInstruction function for each instruction to be executed.
-        executeInstruction(phrase, history, rear, originalPath);
+        executeInstruction(phrase, history, rear, originalPath, alias);
         memset(instruction,0,strlen(instruction));
     }
 }
 
 /* Stage 2: Execute external commands. */
 
-void executeInstruction (char **phrase, char **history, int rear, char originalPath[500]) {
-
+void executeInstruction (char **phrase, char **history, int rear, char originalPath[500], char *alias[MAX_ALIAS_SIZE][2]) {
+    
     // Each instruction will be executed if the input is not null.
-    if (phrase[0]!=NULL) {
-
-        // getPath.
-        if (strcmp(phrase[0], "getpath") == 0) {
+    if (phrase[0]!=NULL){
+        if (strcmp(phrase[0], "getpath")==0) { // getPath.
             getPath(phrase);
-        }
-        // setPath.
-        else if (strcmp(phrase[0], "setpath") == 0) {
+        } else if (strcmp(phrase[0], "setpath") == 0) { // setPath.
             setPath(phrase);
-        }
-        // ! (used in history).
-        else if (strcmp(phrase[0], "!") == 0) {
-            recallHistory(phrase, history, rear, originalPath);
-        }
-        // history.
-        else if (strcmp(phrase[0], "history") == 0) {
+        } else if (strcmp(phrase[0], "!")==0) {  // ! (used in history).
+            recallHistory(phrase, history, rear, originalPath, alias);      
+        } else if (strcmp(phrase[0], "history")==0) { // history.
             printHistory(history, rear);
-        }
-        // cd (change directory).
-        else if (strcmp(phrase[0], "cd") == 0) {
-            changeDirectory(phrase);
-        }
-        // exit.
-        else if (strcmp(phrase[0], "exit") == 0) {
-            exitProgram(0, originalPath, history, rear);
-        }
-        // if the command is not pre-defined.
-        else {
-            executeExternal(phrase);
+        } else if (strcmp(phrase[0], "cd")==0) { // cd (change directory).
+            changeDirectory(joinSubPhrase(phrase));
+        } else if (strcmp(phrase[0], "exit")==0) {
+            exitProgram(0, originalPath, history, rear, alias);
+        } else if((strcmp(phrase[0], "alias")==0) && phrase[1]==NULL){
+            printAlias(alias);
+        } else if((strcmp(phrase[0], "alias")==0) && phrase[1]!=NULL){
+            addAlias(phrase, alias);
+        } else if(strcmp(phrase[0], "unalias")==0){
+            removeAlias(phrase, alias);
+        } else { // if the command is not pre-defined.
+            executeExternal(joinSubPhrase(phrase));
         }
     }
 }
@@ -313,7 +316,7 @@ int howMany(char **history) {
 
 /* Stage 6: Persistent history. */
 
-void recallHistory (char **phrase, char **history, int rear, char originalPath[500]) {
+void recallHistory (char **phrase, char **history, int rear, char originalPath[500], char *alias[MAX_ALIAS_SIZE][2]) {
     int lineNum=0;
 
     if (phrase[1]!=NULL) {
@@ -322,7 +325,7 @@ void recallHistory (char **phrase, char **history, int rear, char originalPath[5
             lineNum = (rear==0?MAX_HISTORY_SIZE-1:rear-1);
             printf("%s\n", history[lineNum]);
             phrase = parseInput(history[lineNum]);
-            executeInstruction(phrase, history, rear, originalPath);
+            executeInstruction(joinSubPhrase(phrase), history, rear, originalPath, alias);
             return;
 
 
@@ -337,7 +340,7 @@ void recallHistory (char **phrase, char **history, int rear, char originalPath[5
 
                     printf("%s\n", history[lineNum]);
                     phrase = parseInput(history[lineNum]);
-                    executeInstruction(phrase, history, rear, originalPath);
+                    executeInstruction(joinSubPhrase(phrase), history, rear, originalPath, alias);
                     return;
                 } else {  // pick a spot
                     if (howMany(history)==20) {
@@ -348,7 +351,7 @@ void recallHistory (char **phrase, char **history, int rear, char originalPath[5
 
                     printf("%s\n", history[lineNum]);
                     phrase = parseInput(history[lineNum]);
-                    executeInstruction(phrase, history, rear, originalPath);
+                    executeInstruction(joinSubPhrase(phrase), history, rear, originalPath, alias);
                     return;
                 }
             } else {
@@ -430,10 +433,11 @@ void printHistory(char **history, int rear){
 }
 
 /* Ran on the way out */
-void exitProgram(int exitCode, char originalPath[500], char **history, int rear) {
+void exitProgram(int exitCode, char originalPath[500], char **history, int rear, char *alias[MAX_ALIAS_SIZE][2]) {
     // Reset the path to what it was before the session was opened
     setenv("PATH", originalPath, 1);
     writeHistory(history, rear);
+    writeAliases(alias);
     exit(exitCode);
 }
 
@@ -470,4 +474,188 @@ char** joinSubPhrase (char **phrase) {
 
     newPhrase[itemIndex]=NULL;
     return newPhrase;
+}
+
+void printAlias(char *alias[MAX_ALIAS_SIZE][2]){
+    int index;
+    int nullEntries=0;
+    int counter =1;
+
+    for (index =0; index <MAX_ALIAS_SIZE; index++){
+        if (alias[index][0] == NULL){
+            nullEntries++; 
+        }
+    }
+
+    if (nullEntries == MAX_ALIAS_SIZE){
+        printf("You dont have any aliases\n");
+    }
+    else{
+        for(index =0; index< (MAX_ALIAS_SIZE - nullEntries); index++){
+            printf("%i. %s %s \n", counter++, alias[index][0], alias[index][1]);
+        }
+    }
+}
+
+void addAlias(char**phrase, char *alias[MAX_ALIAS_SIZE][2]){
+if (phrase[1] == NULL){
+    printf("Not enough arguments");
+    return;
+}
+
+//char name[] = " ";
+char command [512] = " ";
+int index = 2;
+int j;
+int found = 0;
+//find how mnany arguments there are 
+while(phrase[index] != NULL){
+ index++;
+}
+
+//makes command for alias
+for (j =2; j<index; j++){
+    strcat(command, phrase[j]);
+    strcat(command, " ");
+}
+
+//counts null charatcers
+int nullEntries=0;
+ for (index =0; index <MAX_ALIAS_SIZE; index++){
+    if (alias[index][0] == NULL){
+        nullEntries++; 
+    }
+ }
+
+ //checks list of previous alias 
+ for (j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
+    if (strcmp(phrase[1], alias[j][0]) == 0){
+        printf("overwriting previous alias\n");
+        alias[j][1] = strdup(command);   
+        found = 1;
+    }
+ }
+
+ //checks if alias is full if not adds
+ if(nullEntries == 0){
+    printf("no more space for alias");
+    //return;
+}
+ else if (nullEntries != 0 && found == 0){
+    alias[MAX_ALIAS_SIZE-nullEntries][0] =strdup(phrase[1]);
+    alias[MAX_ALIAS_SIZE-nullEntries][1] =strdup(command);
+ }
+}
+
+
+void removeAlias(char **phrase, char *alias[MAX_ALIAS_SIZE][2]){
+    int found = 0;
+    int index;
+    int j;
+    char name[512] = " ";
+
+    if (phrase[1] == NULL){
+        printf("Error: too few arguments\n");
+        return;
+    } else if (phrase[2] != NULL){
+        printf("Error: too many arguments\n");
+        return;
+    }
+
+    strcpy(name, phrase[1]);
+
+    for (index=0; index< MAX_ALIAS_SIZE; index++){
+        if (alias[index][0] != NULL){
+            if (strcmp(name, alias[index][0]) == 0){
+                alias[index][0] = NULL;
+                alias[index][1] = NULL;
+                found = 1;
+                j = index;
+            }
+        }
+    }
+
+    if(found == 0){
+        printf("This alias does not exits\n");
+        return;
+    }
+    else{ //moves all elemnets in array up one
+        while(j<(MAX_ALIAS_SIZE-1)){
+            alias[j][0] = alias[j+1][0];
+            alias[j][1] = alias[j+1][1];
+            j++;
+        } // make the last entry null
+        alias[MAX_ALIAS_SIZE-1][0] = NULL;
+        alias[MAX_ALIAS_SIZE-1][1] = NULL;
+    }
+    return;
+}
+
+
+void invokeAlias(char instruction[MAX_INSTR], char *alias[MAX_ALIAS_SIZE][2]){
+    int index;
+    for (index = 0; index<MAX_ALIAS_SIZE; index++){
+        if (alias[index][0] != NULL){
+            if (strcmp(instruction, alias[index][0]) == 0){
+                strcpy(instruction, alias[index][1]);
+            }
+        }
+    }
+}
+
+void readAliases (char *alias[MAX_ALIAS_SIZE][2]) {
+    FILE *fp;
+    char fileLocation[MAX_INSTR]="";
+    char joinedAlias[MAX_INSTR]="", temp[MAX_INSTR];
+    int numAlias=0, len, letterIndex, pastBar = 0;
+    
+    strcpy(fileLocation, getenv("HOME"));
+    strcat(fileLocation, "/.aliases");
+    fp = fopen(fileLocation, "a+");
+    
+    while(fgets(joinedAlias, sizeof(joinedAlias), fp)!=NULL && numAlias<MAX_ALIAS_SIZE) {
+        len = strlen(joinedAlias);
+        letterIndex=0;
+        if (len && (joinedAlias[len-1]=='\n')) {
+            joinedAlias[len-1] = '\0';   
+        }
+
+        // Prepend alias so that addAlias can be used
+        if (strchr(joinedAlias, '|')!=NULL) {
+            strcpy(temp, joinedAlias);
+            strcpy(joinedAlias, "alias ");
+            strcat(joinedAlias, temp);
+
+            for (int i=0; i<strlen(joinedAlias); i++) {
+                if (joinedAlias[i]=='|') {
+                    joinedAlias[i]= ' ';
+                    break;
+                }
+            }
+            addAlias(parseInput(joinedAlias), alias);
+        } else {
+            printf("Error: Unable to add alias:%s\n", joinedAlias);
+        }
+    }
+    fclose(fp);
+}
+
+void writeAliases(char *alias[MAX_ALIAS_SIZE][2]) {
+    FILE *fp;
+    char fileLocation[MAX_INSTR]="";
+    int aliasCounter = 0;
+    
+    strcpy(fileLocation, getenv("HOME"));
+    strcat(fileLocation, "/.aliases");
+    fp = fopen(fileLocation, "w");
+
+    if (fp == NULL) {
+        printf("Could not open history file\n");
+        return;
+    }
+    
+    while (aliasCounter<MAX_ALIAS_SIZE && alias[aliasCounter][1]!=NULL) {
+        fprintf(fp, "%s|%s\n", alias[aliasCounter][0], alias[aliasCounter][1]);
+        aliasCounter++;
+    }
 }

@@ -1,6 +1,6 @@
 all:
-	gcc main.c -o out
+	gcc -std=c99 main.c -o out
 run:
-	gcc main.c -o out
+	gcc -std=c99 main.c -o out
 	./out
 	rm out
