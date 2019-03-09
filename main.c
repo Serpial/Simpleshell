@@ -34,6 +34,7 @@ void removeAlias(char **phrase, char *alias[MAX_ALIAS_SIZE][2]);
 void invokeAlias(char instruction[MAX_INSTR], char *alias[MAX_ALIAS_SIZE][2]);
 void readAliases (char *alias[MAX_ALIAS_SIZE][2]);
 void writeAliases(char *alias[MAX_ALIAS_SIZE][2]);
+void substituteAlias(char*alias[MAX_ALIAS_SIZE][2], char **phrase);
 
 /* Main Function */
 int main() {
@@ -124,9 +125,17 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
         } else if(strcmp(phrase[0], "unalias")==0){
             removeAlias(phrase, alias);
         } else { // if the command is not pre-defined.
+            
+            int i;
+            for(i =0 ; i<3;i++){
+                substituteAlias(alias, phrase);
+            }
             executeExternal(joinSubPhrase(phrase));
-        }
+
+
+        
     }
+}
 }
 
 /* Stage 3: Setting the current directory to Home. */
@@ -258,6 +267,7 @@ void executeExternal(char **phrase){
 
     if (pid == -1){ // fork is less than zero and so an error has occured
         perror("Error has occurred, fork has failed");
+     
     }
 
     else if (pid == 0){ // in the child and so can execute the command
@@ -272,6 +282,7 @@ void executeExternal(char **phrase){
         int status;
         waitpid(pid, &status,0);
     }
+
 }
 
 /* Stage 3: Setting the Path */
@@ -499,9 +510,14 @@ void printAlias(char *alias[MAX_ALIAS_SIZE][2]){
 
 void addAlias(char**phrase, char *alias[MAX_ALIAS_SIZE][2]){
 if (phrase[1] == NULL){
-    printf("Not enough arguments");
+    printf("Not enough arguments\n");
     return;
 }
+else if(phrase[2] == NULL){
+printf("Not enough arguments\n");
+    return;
+}
+
 
 //char name[] = " ";
 char command [512] = " ";
@@ -658,4 +674,22 @@ void writeAliases(char *alias[MAX_ALIAS_SIZE][2]) {
         fprintf(fp, "%s|%s\n", alias[aliasCounter][0], alias[aliasCounter][1]);
         aliasCounter++;
     }
+}
+
+void substituteAlias(char*alias[MAX_ALIAS_SIZE][2], char **phrase){
+    int i;
+    int j;
+    for(i=0; i<MAX_ALIAS_SIZE; i++){
+        if (alias[i][0] != NULL){
+            if(strcmp(phrase[0], alias[0][i])==0){
+                for(j=0; i<MAX_ALIAS_SIZE; j++){
+                    if(strcmp(phrase[0], alias[j][0])==0){
+                        phrase[0] = alias[i][j];
+                        //printf("%s\n", phrase[i]);
+                        executeExternal(phrase);
+                    }
+            }
+        }
+    }
+}
 }
