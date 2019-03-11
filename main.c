@@ -122,6 +122,7 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
             printAlias(alias);
         } else if((strcmp(phrase[0], "alias")==0) && phrase[1]!=NULL){
             addAlias(phrase, alias);
+            //substituteAlias(alias);  
         } else if(strcmp(phrase[0], "unalias")==0){
             removeAlias(phrase, alias);
         } else { // if the command is not pre-defined.
@@ -516,7 +517,7 @@ printf("Not enough arguments\n");
 
 
 //char name[] = " ";
-char command [512] = " ";
+char command [512] = "";
 int index = 2;
 int j;
 int found = 0;
@@ -528,7 +529,7 @@ while(phrase[index] != NULL){
 //makes command for alias
 for (j =2; j<index; j++){
     strcat(command, phrase[j]);
-    strcat(command, " ");
+    strcat(command, "");
 }
 
 //counts null charatcers
@@ -543,7 +544,8 @@ int nullEntries=0;
  for (j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
     if (strcmp(phrase[1], alias[j][0]) == 0){
         printf("overwriting previous alias\n");
-        alias[j][1] = strdup(command);   
+        alias[j][1] = strdup(command);
+   
         found = 1;
     }
  }
@@ -556,6 +558,8 @@ int nullEntries=0;
  else if (nullEntries != 0 && found == 0){
     alias[MAX_ALIAS_SIZE-nullEntries][0] =strdup(phrase[1]);
     alias[MAX_ALIAS_SIZE-nullEntries][1] =strdup(command);
+  
+
  }
 
 substituteAlias(alias);  
@@ -681,6 +685,7 @@ int index =0;
 int k=0;
 char value[512] = "";
 char match[512] = "";
+char test[512] = "";
 int nullEntries=0;
  for (k=0; k<MAX_ALIAS_SIZE; k++){
     if (alias[k][0] == NULL){
@@ -689,12 +694,12 @@ int nullEntries=0;
  }
 for (j=0; j<MAX_ALIAS_SIZE-nullEntries; j++){
         strcpy(value, alias[j][1]);
-         for (index=0; index< MAX_ALIAS_SIZE-nullEntries; index++){
-            if (strcmp(value, alias[index][0]) == 0){
+         for (index=1; index< MAX_ALIAS_SIZE-nullEntries; index++){
+                strcpy(test, alias[index][0]);
+            if (strcmp(value, test) == 0){
                 strcpy(match, alias[index][1]);
-                //match = strdup(alias[index][1]);
-                //strcpy(alias[j][1], match);
                 alias[j][1] = strdup(match);
+
             
             }
         }
