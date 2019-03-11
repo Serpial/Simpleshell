@@ -125,10 +125,7 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
         } else if(strcmp(phrase[0], "unalias")==0){
             removeAlias(phrase, alias);
         } else { // if the command is not pre-defined.
-            
-           
-          
-                substituteAlias(alias);
+                //substituteAlias(alias);
                 executeExternal(joinSubPhrase(phrase));
 
 
@@ -555,20 +552,13 @@ int nullEntries=0;
  if(nullEntries == 0){
     printf("no more space for alias");
     //return;
-}
+    }
  else if (nullEntries != 0 && found == 0){
     alias[MAX_ALIAS_SIZE-nullEntries][0] =strdup(phrase[1]);
     alias[MAX_ALIAS_SIZE-nullEntries][1] =strdup(command);
  }
 
-/*
-int i=1;
- while (i!=0){
-                i = substituteAlias(alias);
-            }
-
-*/
-//substituteAlias(alias); 
+substituteAlias(alias); 
 
 }
 
@@ -685,7 +675,7 @@ void writeAliases(char *alias[MAX_ALIAS_SIZE][2]) {
     }
 }
 
-
+/*
 void substituteAlias(char *alias[MAX_ALIAS_SIZE][2]){
  int i=0;
  int j;
@@ -698,6 +688,22 @@ void substituteAlias(char *alias[MAX_ALIAS_SIZE][2]){
               } 
               i++; 
             
+        }
+    }
+}*/
+void substituteAlias(char * alias[MAX_ALIAS_SIZE][2]){
+int j = 0;
+int index =0;
+char value[512] = " ";
+strcpy(value, alias[0][j]);
+  for (index=0; index< MAX_ALIAS_SIZE; index++){
+        if (alias[index][0] != NULL){
+            if (strcmp(value, alias[index][0]) == 0){
+                char match[512] = " ";
+                strcpy(match, alias[0][index]);
+                strcpy(alias[0][j], match);
+                j = index;
+            }
         }
     }
 }
