@@ -558,8 +558,7 @@ int nullEntries=0;
     alias[MAX_ALIAS_SIZE-nullEntries][1] =strdup(command);
  }
 
-substituteAlias(alias); 
-
+substituteAlias(alias);  
 }
 
 
@@ -675,35 +674,42 @@ void writeAliases(char *alias[MAX_ALIAS_SIZE][2]) {
     }
 }
 
-/*
+
 void substituteAlias(char *alias[MAX_ALIAS_SIZE][2]){
- int i=0;
- int j;
- for(j=0; j< MAX_ALIAS_SIZE; j++){
-    if (alias[i][0] != NULL){
-              if (strcmp(alias[0][j], alias[i][0]) ==0){
-                 char sub[512] = " ";
-                 strcpy(sub, alias[i][j]);
-                 strcpy(alias[0][j], sub);
-              } 
-              i++; 
-            
-        }
-    }
-}*/
-void substituteAlias(char * alias[MAX_ALIAS_SIZE][2]){
 int j = 0;
 int index =0;
-char value[512] = " ";
-strcpy(value, alias[0][j]);
-  for (index=0; index< MAX_ALIAS_SIZE; index++){
-        if (alias[index][0] != NULL){
+int k=0;
+char value[512] = "";
+char match[512] = "";
+int nullEntries=0;
+ for (k=0; k<MAX_ALIAS_SIZE; k++){
+    if (alias[k][0] == NULL){
+        nullEntries++; 
+    }
+ }
+for (j=0; j<MAX_ALIAS_SIZE-nullEntries; j++){
+        strcpy(value, alias[j][1]);
+         for (index=0; index< MAX_ALIAS_SIZE-nullEntries; index++){
             if (strcmp(value, alias[index][0]) == 0){
-                char match[512] = " ";
-                strcpy(match, alias[0][index]);
-                strcpy(alias[0][j], match);
-                j = index;
+                strcpy(match, alias[index][1]);
+                //match = strdup(alias[index][1]);
+                //strcpy(alias[j][1], match);
+                alias[j][1] = strdup(match);
+            
             }
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
