@@ -34,7 +34,7 @@ void removeAlias(char **phrase, char *alias[MAX_ALIAS_SIZE][2]);
 void invokeAlias(char instruction[MAX_INSTR], char *alias[MAX_ALIAS_SIZE][2]);
 void readAliases (char *alias[MAX_ALIAS_SIZE][2]);
 void writeAliases(char *alias[MAX_ALIAS_SIZE][2]);
-void substituteAlias(char*alias[MAX_ALIAS_SIZE][2], char **phrase);
+void substituteAlias(char*alias[MAX_ALIAS_SIZE][2]);
 
 /* Main Function */
 int main() {
@@ -103,7 +103,7 @@ int main() {
 /* Stage 2: Execute external commands. */
 
 void executeInstruction (char **phrase, char **history, int rear, char originalPath[500], char *alias[MAX_ALIAS_SIZE][2]) {
-    
+    int i=1;
     // Each instruction will be executed if the input is not null.
     if (phrase[0]!=NULL){
         if (strcmp(phrase[0], "getpath")==0) { // getPath.
@@ -126,11 +126,10 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
             removeAlias(phrase, alias);
         } else { // if the command is not pre-defined.
             
-            int i;
-            for(i =0 ; i<3;i++){
-                substituteAlias(alias, phrase);
-            }
-            executeExternal(joinSubPhrase(phrase));
+           
+          
+                substituteAlias(alias);
+                executeExternal(joinSubPhrase(phrase));
 
 
         
@@ -561,6 +560,16 @@ int nullEntries=0;
     alias[MAX_ALIAS_SIZE-nullEntries][0] =strdup(phrase[1]);
     alias[MAX_ALIAS_SIZE-nullEntries][1] =strdup(command);
  }
+
+/*
+int i=1;
+ while (i!=0){
+                i = substituteAlias(alias);
+            }
+
+*/
+//substituteAlias(alias); 
+
 }
 
 
@@ -676,20 +685,19 @@ void writeAliases(char *alias[MAX_ALIAS_SIZE][2]) {
     }
 }
 
-void substituteAlias(char*alias[MAX_ALIAS_SIZE][2], char **phrase){
-    int i;
-    int j;
-    for(i=0; i<MAX_ALIAS_SIZE; i++){
-        if (alias[i][0] != NULL){
-            if(strcmp(phrase[0], alias[0][i])==0){
-                for(j=0; i<MAX_ALIAS_SIZE; j++){
-                    if(strcmp(phrase[0], alias[j][0])==0){
-                        phrase[0] = alias[i][j];
-                        //printf("%s\n", phrase[i]);
-                        executeExternal(phrase);
-                    }
-            }
+
+void substituteAlias(char *alias[MAX_ALIAS_SIZE][2]){
+ int i=0;
+ int j;
+ for(j=0; j< MAX_ALIAS_SIZE; j++){
+    if (alias[i][0] != NULL){
+              if (strcmp(alias[0][j], alias[i][0]) ==0){
+                 char sub[512] = " ";
+                 strcpy(sub, alias[i][j]);
+                 strcpy(alias[0][j], sub);
+              } 
+              i++; 
+            
         }
     }
-}
 }
