@@ -114,7 +114,7 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
         } else if (strcmp(phrase[0], "history")==0) { // history.
             printHistory(history, rear);
         } else if (strcmp(phrase[0], "cd")==0) { // cd (change directory).
-            changeDirectory(joinSubPhrase(phrase));
+            changeDirectory(phrase);
         } else if (strcmp(phrase[0], "exit")==0) {
             exitProgram(0, originalPath, history, rear, alias);
         } else if((strcmp(phrase[0], "alias")==0) && phrase[1]==NULL){
@@ -124,7 +124,7 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
         } else if(strcmp(phrase[0], "unalias")==0){
             removeAlias(phrase, alias);
         } else { // if the command is not pre-defined.
-            executeExternal(joinSubPhrase(phrase));
+            executeExternal(phrase);
         }
     }
 }
@@ -325,7 +325,7 @@ void recallHistory (char **phrase, char **history, int rear, char originalPath[5
             lineNum = (rear==0?MAX_HISTORY_SIZE-1:rear-1);
             printf("%s\n", history[lineNum]);
             phrase = parseInput(history[lineNum]);
-            executeInstruction(joinSubPhrase(phrase), history, rear, originalPath, alias);
+            executeInstruction(phrase, history, rear, originalPath, alias);
             return;
 
 
@@ -340,7 +340,7 @@ void recallHistory (char **phrase, char **history, int rear, char originalPath[5
 
                     printf("%s\n", history[lineNum]);
                     phrase = parseInput(history[lineNum]);
-                    executeInstruction(joinSubPhrase(phrase), history, rear, originalPath, alias);
+                    executeInstruction(phrase, history, rear, originalPath, alias);
                     return;
                 } else {  // pick a spot
                     if (howMany(history)==20) {
@@ -351,7 +351,7 @@ void recallHistory (char **phrase, char **history, int rear, char originalPath[5
 
                     printf("%s\n", history[lineNum]);
                     phrase = parseInput(history[lineNum]);
-                    executeInstruction(joinSubPhrase(phrase), history, rear, originalPath, alias);
+                    executeInstruction(phrase, history, rear, originalPath, alias);
                     return;
                 }
             } else {
