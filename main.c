@@ -35,6 +35,7 @@ void invokeAlias(char instruction[MAX_INSTR], char *alias[MAX_ALIAS_SIZE][2]);
 void readAliases (char *alias[MAX_ALIAS_SIZE][2]);
 void writeAliases(char *alias[MAX_ALIAS_SIZE][2]);
 void substituteAlias(char*alias[MAX_ALIAS_SIZE][2]);
+int howManyNullSpaces(char *alias[MAX_ALIAS_SIZE][2]);
 
 /* Main Function */
 int main() {
@@ -131,20 +132,19 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
                 
                //if we havent found command yet see if it is in alias
                 int nullEntries=0;
-                for (index =0; index <MAX_ALIAS_SIZE; index++){
-                    if (alias[index][0] == NULL){
-                        nullEntries++; 
-                    }
-                }
+                 nullEntries = howManyNullSpaces(alias);
 
-                 //checks if command is an alias
+                 //checks if command is an alias then runs execute instruction again 
                 for (j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
                     if (strcmp(phrase[0], alias[j][0]) == 0){
                     phrase[0] = strdup(alias [j][1]);
                     executeInstruction(phrase, history, rear, originalPath, alias);
                     }
                 }
+
      
+                
+                //if the command is not an 
                 executeExternal(phrase);
 
 
@@ -217,6 +217,7 @@ void changeDirectory(char **arguments) {
             // This will use the perror() function if there is no such directory.
             if(chdir(firstArgument) == -1) {
                 perror(firstArgument);
+                
             }
             
         }
@@ -552,11 +553,7 @@ for (j =2; j<index; j++){
 
 //counts null charatcers
 int nullEntries=0;
- for (index =0; index <MAX_ALIAS_SIZE; index++){
-    if (alias[index][0] == NULL){
-        nullEntries++; 
-    }
- }
+nullEntries = howManyNullSpaces(alias);
 
  //checks list of previous alias 
  for (j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
@@ -705,11 +702,7 @@ char value[512] = "";
 char match[512] = "";
 char test[512] = "";
 int nullEntries=0;
- for (k=0; k<MAX_ALIAS_SIZE; k++){
-    if (alias[k][0] == NULL){
-        nullEntries++; 
-    }
- }
+nullEntries = howManyNullSpaces(alias);
 for (j=0; j<MAX_ALIAS_SIZE-nullEntries; j++){
         strcpy(value, alias[j][1]);
          for (index=1; index< MAX_ALIAS_SIZE-nullEntries; index++){
@@ -722,6 +715,18 @@ for (j=0; j<MAX_ALIAS_SIZE-nullEntries; j++){
             }
         }
     }
+}
+
+//utlitly fucntion for alaias 
+int howManyNullSpaces(char *alias[MAX_ALIAS_SIZE][2]){
+int k; 
+int nullEntries=0;
+ for (k=0; k<MAX_ALIAS_SIZE; k++){
+    if (alias[k][0] == NULL){
+        nullEntries++; 
+    }
+ }
+ return nullEntries;   
 }
 
 
