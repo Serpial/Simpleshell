@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -57,7 +59,27 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
         } else if(strcmp(phrase[0], "unalias")==0){
             removeAlias(phrase, alias);
         } else { // if the command is not pre-defined.
-            executeExternal(phrase);
-        }
+             // if the command is not pre-defined.
+                
+               //if we havent found command yet see if it is in alias
+                int nullEntries=0;
+                 nullEntries = howManyNullSpaces(alias);
+
+                 //checks if command is an alias then runs execute instruction again 
+                for (int j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
+                    if (strcmp(phrase[0], alias[j][0]) == 0){
+                    phrase[0] = strdup(alias [j][1]);
+                    executeInstruction(phrase, history, rear, originalPath, alias);
+                    }
+                }
+
+     
+                
+                //if the command is not an 
+                executeExternal(phrase);
+
+
+        
     }
+}
 }

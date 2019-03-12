@@ -162,6 +162,3 @@ void exitProgram(int exitCode, char *originalPath, char **history, int rear, cha
     writeAliases(alias);
     exit(exitCode);
 }
-
-
-
