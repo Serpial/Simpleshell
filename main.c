@@ -103,7 +103,9 @@ int main() {
 /* Stage 2: Execute external commands. */
 
 void executeInstruction (char **phrase, char **history, int rear, char originalPath[500], char *alias[MAX_ALIAS_SIZE][2]) {
-    int i=1;
+    int j;
+    int index;
+    int found = 1;
     // Each instruction will be executed if the input is not null.
     if (phrase[0]!=NULL){
         if (strcmp(phrase[0], "getpath")==0) { // getPath.
@@ -126,7 +128,23 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
         } else if(strcmp(phrase[0], "unalias")==0){
             removeAlias(phrase, alias);
         } else { // if the command is not pre-defined.
-                //substituteAlias(alias);
+                
+               //if we havent found command yet see if it is in alias
+                int nullEntries=0;
+                for (index =0; index <MAX_ALIAS_SIZE; index++){
+                    if (alias[index][0] == NULL){
+                        nullEntries++; 
+                    }
+                }
+
+                 //checks if command is an alias
+                for (j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
+                    if (strcmp(phrase[0], alias[j][0]) == 0){
+                    phrase[0] = strdup(alias [j][1]);
+                    executeInstruction(phrase, history, rear, originalPath, alias);
+                    }
+                }
+     
                 executeExternal(phrase);
 
 
