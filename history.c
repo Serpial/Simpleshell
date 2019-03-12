@@ -97,7 +97,7 @@ void recallHistory (char **phrase, char **history, int rear, char *originalPath,
 
 
                     lineNum = (rear+lineNum)<0?
-                        (MAX_HISTORY_SIZE-1)+(rear+lineNum): lineNum+rear;
+                        (MAX_HISTORY_SIZE-1)+(rear+lineNum)+1: lineNum+rear;
 
                     printf("%s\n", history[lineNum]);
                     phrase = parseInput(history[lineNum]);
