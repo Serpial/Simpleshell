@@ -8,6 +8,9 @@
 #include "phrase.h"
 
 
+/*
+printAlias:prints all the stored aliases to screen.
+*/
 void printAlias(char *alias[MAX_ALIAS_SIZE][2]){
     int index;
     int nullEntries=0;
@@ -28,6 +31,10 @@ void printAlias(char *alias[MAX_ALIAS_SIZE][2]){
         }
     }
 }
+
+/*
+addAlias: allows the user to create a new alias for a command.
+*/
 
 void addAlias(char**phrase, char *alias[MAX_ALIAS_SIZE][2]){
 if (phrase[1] == NULL){
@@ -85,7 +92,9 @@ nullEntries = howManyNullSpaces(alias);
 substituteAlias(alias);  
 }
 
-
+/*
+removeAlias: Removes the requested alias.
+*/
 void removeAlias(char **phrase, char *alias[MAX_ALIAS_SIZE][2]){
     int found = 0;
     int index;
@@ -129,7 +138,10 @@ void removeAlias(char **phrase, char *alias[MAX_ALIAS_SIZE][2]){
     return;
 }
 
-
+/*
+invokeAlias: Is used to recognise when an alias is called and then change
+the current instruction to that aliases command.
+*/
 void invokeAlias(char* instruction, char *alias[MAX_ALIAS_SIZE][2]){
     int index;
     for (index = 0; index<MAX_ALIAS_SIZE; index++){
@@ -140,6 +152,11 @@ void invokeAlias(char* instruction, char *alias[MAX_ALIAS_SIZE][2]){
         }
     }
 }
+
+/*
+readAliases: Similar to History.c, readAliases reads in a file at a speciified
+location and procedes to fill alias[][] with the text inside.
+*/
 
 void readAliases (char *alias[MAX_ALIAS_SIZE][2]) {
     FILE *fp;
@@ -177,6 +194,10 @@ void readAliases (char *alias[MAX_ALIAS_SIZE][2]) {
     }
     fclose(fp);
 }
+
+/*
+writeAliases: Is used to save the contents of alias[][] to an external file.
+*/
 
 void writeAliases(char *alias[MAX_ALIAS_SIZE][2]) {
     FILE *fp;
