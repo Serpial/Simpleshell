@@ -11,9 +11,7 @@
 // Function prototype
 int howMany(char **history);
 
-
-/*Stage 5: Adding commands to history, invoking commands from history and
-  printing the history. */
+/* Stage 6: Persistent history. */
 
 /*writeHistory: Writes the current elements in History to a specified file
  location returning an error message if it does not open*/
@@ -67,6 +65,9 @@ void readHistory(char **history, int *rear){
     fclose(fp);
 }
 
+/*Stage 5: Adding commands to history, invoking commands from history and
+  printing the history. */
+
 /*Prints 20 elements of history to the user.*/
 void printHistory(char **history, int rear){
     //set i to be a copy of rear to read in from most recent
@@ -80,8 +81,6 @@ void printHistory(char **history, int rear){
     }
     while ( i != rear);
 }
-
-/* Stage 6: Persistent history. */
 
 /*recallHistory: Is what is used to “recall” a command from memory.
 With it a user can specify where in memory the requested memory is
