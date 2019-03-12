@@ -15,6 +15,9 @@ int howMany(char **history);
 /*Stage 5: Adding commands to history, invoking commands from history and
   printing the history. */
 
+/*writeHistory: Writes the current elements in History to a specified file
+ location returning an error message if it does not open*/
+
 void writeHistory(char **history, int rear) {
     FILE *fp;
     int i;
@@ -37,6 +40,9 @@ void writeHistory(char **history, int rear) {
         i=(i+1)%MAX_HISTORY_SIZE;
     } while (i!=rear);
 }
+
+/*readHistory: opens a text file in the same specified location as WriteHistory
+and fills  the running programs history with the text in the file.*/
 
 void readHistory(char **history, int *rear){
     FILE *fp;
@@ -77,6 +83,10 @@ void printHistory(char **history, int rear){
 
 /* Stage 6: Persistent history. */
 
+/*recallHistory: Is what is used to “recall” a command from memory.
+With it a user can specify where in memory the requested memory is
+and then have it be used as normal through the executer file.
+*/
 void recallHistory (char **phrase, char **history, int rear, char *originalPath, char *(*alias)[2]) {
     int lineNum=0;
 
@@ -129,7 +139,7 @@ void recallHistory (char **phrase, char **history, int rear, char *originalPath,
         return;
     }
 }
-
+ /*howMany: returns how many entries are in History*/
 int howMany(char **history) {
     int counter=0;
     int index=0;
