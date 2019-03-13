@@ -60,8 +60,10 @@ while(phrase[index] != NULL){
 //makes command for alias
 for (j =2; j<index; j++){
     strcat(command, phrase[j]);
-    strcat(command, "");
+    strcat(command, " ");
 }
+
+
 
 //counts null charatcers
 int nullEntries=0;
@@ -72,7 +74,6 @@ nullEntries = howManyNullSpaces(alias);
     if (strcmp(phrase[1], alias[j][0]) == 0){
         printf("overwriting previous alias\n");
         alias[j][1] = strdup(command);
-   
         found = 1;
     }
  }
@@ -89,7 +90,7 @@ nullEntries = howManyNullSpaces(alias);
 
  }
 
-substituteAlias(alias);  
+//substituteAlias(alias);  
 }
 
 /*
@@ -223,24 +224,43 @@ void substituteAlias(char *alias[MAX_ALIAS_SIZE][2]){
 int j = 0;
 int index =0;
 int k=0;
-char value[512] = "";
-char match[512] = "";
-char test[512] = "";
+int p=0;
+char value[512];
+char match[512];
+char test[512];
 int nullEntries=0;
 nullEntries = howManyNullSpaces(alias);
 for (j=0; j<MAX_ALIAS_SIZE-nullEntries; j++){
+    printf("here1\n");
         strcpy(value, alias[j][1]);
          for (index=1; index< MAX_ALIAS_SIZE-nullEntries; index++){
-                strcpy(test, alias[index][0]);
+             printf("here2\n");
+             strcpy(test, alias[index][0]);
+             while(k<strlen(test)){
+                test[k]= test[k+1];
+                printf("here3\n");
+                printf("value:%s\n", value);
+                printf("test:%s\n", test);
+                k++;
+            }
             if (strcmp(value, test) == 0){
+                printf("here4\n");
                 strcpy(match, alias[index][1]);
+                printf("here5\n");
                 alias[j][1] = strdup(match);
 
             
             }
         }
-    }
+        }
+   // }
 }
+
+
+
+
+
+
 
 //utlitly fucntion for alaias 
 int howManyNullSpaces(char *alias[MAX_ALIAS_SIZE][2]){
