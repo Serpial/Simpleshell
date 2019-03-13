@@ -1,4 +1,5 @@
 #include "phrase.h"
+
 #include <string.h>
 #include <stdlib.h>
 
@@ -49,7 +50,7 @@ char** parseInput(char* instruction) {
         if (strchr(specialChar, instruction[counter])==NULL) {
 
             // ...then add it to a member of the phrase.
-            if (instruction[counter]!=' ') {
+            if (instruction[counter]!=' '&&instruction[counter]!='\t') {
 
                 if (letterIdx == 0) {
                     phrase[wordIdx]= (char *) malloc(100);
@@ -58,7 +59,8 @@ char** parseInput(char* instruction) {
                 phrase[wordIdx][letterIdx++]=instruction[counter];
 
 
-                if (instruction[counter+1]==' '||instruction[counter+1]=='\0') {
+                if (instruction[counter+1]==' '||instruction[counter+1]=='\0'||
+                    instruction[counter+1]=='\t') {
                     phrase[wordIdx][letterIdx]='\0';
                     wordIdx++;
                     letterIdx=0;

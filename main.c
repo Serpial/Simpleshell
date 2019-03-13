@@ -18,6 +18,35 @@
 
 /* Prototypes */
 char* buildPrefix(char* directory);
+/*Adds instruction to history under certain conditions
+ */
+int addToHistory(char **history, int rear, char** phrase) {
+    int counter=0, i;
+    char newInstruction[MAX_INSTR];
+    strcpy(newInstruction, "");
+    char charToAdd[2];
+    charToAdd[1]='\0';
+
+    // Adds each token in phrase to instruction with a space in between
+    while (phrase[counter]!=NULL && counter<MAX_INSTR) {
+        for(i=0; phrase[counter][i]!='\0';i++) {
+            charToAdd[0]=phrase[counter][i];
+            strcat(newInstruction, charToAdd);
+        }
+        if (phrase[counter][i]=='\0'&&phrase[counter+1]!=NULL){
+            strcat(newInstruction, " ");
+        }
+        counter++;
+    }
+    
+    newInstruction[MAX_INSTR-1]='\0';
+    if (strcmp(newInstruction, "")!=0) {
+        strcpy(history[rear], newInstruction);
+        rear = (1+rear) % MAX_HISTORY_SIZE;
+    }
+    return rear;
+}
+
 
 /* Main Function */
 int main() {
@@ -70,11 +99,10 @@ int main() {
         invokeAlias(instruction, alias);
         // Run the given command
         phrase = parseInput(instruction);
-
-        // Put instruction into history if it isn't a 'fetch from history' command.
+        
+        // Put instruction into history and get new rear
         if (phrase[0]!=NULL && strcmp(phrase[0], "!")!=0) {
-            strcpy(history[rear], instruction);
-            rear = (1+rear) % MAX_HISTORY_SIZE;
+            rear = addToHistory(history, rear, phrase);
         }
 
         // Calls the executeInstruction function for each instruction to be executed.
