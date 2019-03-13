@@ -66,10 +66,11 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
                  int i=0;
                  int l=0;
                  int k=0;
+                 int p=0;
                  char value[512] ="";
                  char match[512]= "";
                  char test[512]= "";
-                 int nullEntries=0;
+               int nullEntries=0;
                  nullEntries = howManyNullSpaces(alias);
 
                  //checks if command is an alias then runs execute instruction again 
@@ -89,16 +90,24 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
                                 printf("here6\n");
                                 strcpy(match, alias[i][1]);
                                 printf("here7\n");
-
+                                memset(phrase[0], 0, sizeof(phrase));
                                 for (k=0; k<strlen(match); k++){
 
                                     printf("here8\n");
                                     if(match[k]!= ' '){
+                                        char temp[512]= "";   
+                                        //memset(phrase[0], 0, sizeof(phrase));
                                         printf("here9\n");
-                                        printf("match:%s\n", match);
-                                        strcat(phrase[l], &match[k]);
+                                        printf("match:%c\n", match[k]);
+                                        //strcat(phrase[l], &match[k]);
+                                        strcat(temp,&match[k]);
+                                        printf("here10\n");
+                                        printf("temp:%s\n", temp);
+                                        phrase[l] = temp;
+                                        printf("phrase:%s\n", phrase[l]);
                                         l++;
                                     }
+                                    
                                 }
                                 executeInstruction(phrase, history, rear, originalPath, alias);
                             }
