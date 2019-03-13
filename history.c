@@ -142,7 +142,7 @@ void recallHistory (char **phrase, char **history, int rear, char *originalPath,
 int howMany(char **history) {
     int counter=0;
     int index=0;
-    while(strcmp(history[index], "\0") && index!=MAX_HISTORY_SIZE+1) {
+    while(index<MAX_HISTORY_SIZE && strcmp(history[index], "\0") ) {
         counter++;
         index++;
     }
