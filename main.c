@@ -157,6 +157,7 @@ void changeDirectory(char **arguments) {
 void exitProgram(int exitCode, char *originalPath, char **history, int rear, char *(*alias)[2]) {
     // Reset the path to what it was before the session was opened
     setenv("PATH", originalPath, 1);
+    printf("Reset path to:%s\n", originalPath);
     writeHistory(history, rear);
     writeAliases(alias);
     exit(exitCode);
