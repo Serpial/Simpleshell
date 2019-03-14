@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "phrase.h"
+#include "main.h"
 
 
 /*

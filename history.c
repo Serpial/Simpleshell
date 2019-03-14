@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "phrase.h"
+#include "main.h"
 #include "alias.h"
 #include "execute.h"
 
