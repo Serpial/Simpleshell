@@ -1,7 +1,10 @@
 #define _GNU_SOURCE
 
+#include "execute.h"
+
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -9,9 +12,13 @@
 #include "alias.h"
 #include "history.h"
 #include "main.h"
-#include "path.h"
 
-// Duplicates process
+// Function Prototypes
+void setPath(char **phrase);
+void getPath(char **phrase);
+
+
+/* Stage 2: Execute external commands. */
 void executeExternal(char **phrase){
     pid_t pid;
     pid = fork();
@@ -34,10 +41,9 @@ void executeExternal(char **phrase){
     }
 }
 
-/* Stage 2: Execute external commands. */
-
-void executeInstruction (char **phrase, char **history, int rear, char originalPath[500], char *alias[MAX_ALIAS_SIZE][2]) {
-    
+/* Execute internal and external instructions based on the first arguement 
+*/
+void executeInstruction (char **phrase, char **history, int rear, char originalPath[500], char *(*alias)[2]) {
     // Each instruction will be executed if the input is not null.
     if (phrase[0]!=NULL){
         if (strcmp(phrase[0], "getpath")==0) { // getPath.
@@ -59,27 +65,48 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
         } else if(strcmp(phrase[0], "unalias")==0){
             removeAlias(phrase, alias);
         } else { // if the command is not pre-defined.
-             // if the command is not pre-defined.
-                
-               //if we havent found command yet see if it is in alias
-                int nullEntries=0;
-                 nullEntries = howManyNullSpaces(alias);
+            //if we havent found command yet see if it is in alias
+            int nullEntries=0;
+            nullEntries = howManyNullSpaces(alias);
 
-                 //checks if command is an alias then runs execute instruction again 
-                for (int j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
-                    if (strcmp(phrase[0], alias[j][0]) == 0){
+            //checks if command is an alias then runs execute instruction again 
+            for (int j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
+                if (strcmp(phrase[0], alias[j][0]) == 0){
                     phrase[0] = strdup(alias [j][1]);
                     executeInstruction(phrase, history, rear, originalPath, alias);
-                    }
                 }
-
-     
-                
-                //if the command is not an 
-                executeExternal(phrase);
-
-
-        
+            }
+            //if the command is not an 
+            executeExternal(phrase);
+        }
     }
 }
+
+/* Stage 3: Setting the Path */
+
+// Allows the user to SET the path environment variable.
+void setPath(char **phrase) {
+    char tempPath[PATHSIZE];
+
+    if (phrase[2]!=NULL){
+        printf("Too many arguments\n");
+    } else if (phrase[1]==NULL){
+        printf("Too few arguments\n");
+    } else {
+        strcpy(tempPath, phrase[1]);
+        strcat(tempPath, ":");
+        strcat(tempPath, getenv("PATH"));
+        setenv("PATH", tempPath, 1);
+    }
+}
+
+/* Stage 3: Getting the Path */
+
+// Allow the user to GET the path environment variable.
+void getPath(char **phrase){
+    if (phrase[1]!=NULL){
+        printf("Too many arguments\n");
+    } else {
+        printf("%s\n", getenv("PATH"));
+    }
 }

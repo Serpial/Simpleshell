@@ -11,10 +11,6 @@
 #include "alias.h"
 #include "execute.h"
 #include "main.h"
-#include "path.h"
-
-/* Definitions */
-#define PATHSIZE 200        // Maximum number of chars in currentDirectory
 
 /* Prototypes */
 char* buildPrefix(char* directory);
