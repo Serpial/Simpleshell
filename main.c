@@ -70,7 +70,7 @@ int main() {
         invokeAlias(instruction, alias);
         // Run the given command
         phrase = parseInput(instruction);
-        
+
         // Put instruction into history and get new rear
         if (phrase[0]!=NULL && strcmp(phrase[0], "!")!=0) {
             rear = addToHistory(history, rear, phrase);

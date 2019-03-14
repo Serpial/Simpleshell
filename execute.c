@@ -48,7 +48,7 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
             recallHistory(phrase, history, rear, originalPath, alias);      
         } else if (strcmp(phrase[0], "history")==0) { // history.
             printHistory(history, rear);
-        } else if (strcmp(phrase[0], "cd")==0) { // cd (change directory).
+        } else if ((strcmp(phrase[0], "cd")==0)){ // cd (change directory).
             changeDirectory(phrase);
         } else if (strcmp(phrase[0], "exit")==0) {
             exitProgram(0, originalPath, history, rear, alias);
@@ -59,8 +59,27 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
         } else if(strcmp(phrase[0], "unalias")==0){
             removeAlias(phrase, alias);
         } else { 
-                executeExternal(phrase);
-
+                int nullEntries=0;
+         
+            nullEntries = howManyNullSpaces(alias);
+            
+            //checks if command is an alias then runs execute instruction again 
+            for (int j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
+                if (strcmp(phrase[0], alias[j][0]) == 0){
+                    //strcpy(phrase[0],alias[j][1]);
+                     phrase[0] = strdup(alias [j][1]);
+                    executeInstruction(phrase, history, rear, originalPath, alias);
+                   return;
+                }
             }
-        }
-    }
+        
+            //if the command is not an 
+            executeExternal(phrase);
+    }   
+    } 
+    
+}
+
+
+            
+ 

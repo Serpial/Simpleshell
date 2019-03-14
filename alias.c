@@ -100,7 +100,7 @@ void removeAlias(char **phrase, char *alias[MAX_ALIAS_SIZE][2]){
     int found = 0;
     int index;
     int j;
-    char name[512] = " ";
+    char name[512] = "";
 
     if (phrase[1] == NULL){
         printf("Error: too few arguments\n");
@@ -149,18 +149,21 @@ void invokeAlias(char* instruction, char *alias[MAX_ALIAS_SIZE][2]){
     nullEntries = howManyNullSpaces(alias);
     for (index = 0; index<MAX_ALIAS_SIZE; index++){
         if (alias[index][0] != NULL){
-            if (strcmp(instruction, alias[index][0]) == 0){
+            if (strcmp(instruction, alias[index][0]) == 0){ 
                 for (int j=0; j<MAX_ALIAS_SIZE-nullEntries; j++){ //stage 9
                     if (strcmp(alias[j][0], alias[index][1]) !=0){ //stage 9
                         strcpy(instruction, alias[j][1]); //stage 9
                         return; //stage 9
                     }
+                    //strcpy(instruction, alias[index][1]); //stage 8
                 }
-            
-               strcpy(instruction, alias[index][1]); //stage 8
+
+             strcpy(instruction, alias[index][1]); //stage 8
+              
             
         
     }
+
 }
 }
 }
