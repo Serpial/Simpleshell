@@ -90,7 +90,7 @@ nullEntries = howManyNullSpaces(alias);
 
  }
 
-//substituteAlias(alias);  
+
 }
 
 /*
@@ -145,13 +145,24 @@ the current instruction to that aliases command.
 */
 void invokeAlias(char* instruction, char *alias[MAX_ALIAS_SIZE][2]){
     int index;
+    int nullEntries;
+    nullEntries = howManyNullSpaces(alias);
     for (index = 0; index<MAX_ALIAS_SIZE; index++){
         if (alias[index][0] != NULL){
             if (strcmp(instruction, alias[index][0]) == 0){
-                strcpy(instruction, alias[index][1]);
-            }
-        }
+                for (int j=0; j<MAX_ALIAS_SIZE-nullEntries; j++){ //stage 9
+                    if (strcmp(alias[j][0], alias[index][1]) !=0){ //stage 9
+                        strcpy(instruction, alias[j][1]); //stage 9
+                        return; //stage 9
+                    }
+                }
+            
+               strcpy(instruction, alias[index][1]); //stage 8
+            
+        
     }
+}
+}
 }
 
 /*
@@ -219,43 +230,6 @@ void writeAliases(char *alias[MAX_ALIAS_SIZE][2]) {
         aliasCounter++;
     }
 }
-
-void substituteAlias(char *alias[MAX_ALIAS_SIZE][2]){
-int j = 0;
-int index =0;
-int k=0;
-int p=0;
-char value[512];
-char match[512];
-char test[512];
-int nullEntries=0;
-nullEntries = howManyNullSpaces(alias);
-for (j=0; j<MAX_ALIAS_SIZE-nullEntries; j++){
-    printf("here1\n");
-        strcpy(value, alias[j][1]);
-         for (index=1; index< MAX_ALIAS_SIZE-nullEntries; index++){
-             printf("here2\n");
-             strcpy(test, alias[index][0]);
-             while(k<strlen(test)){
-                test[k]= test[k+1];
-                printf("here3\n");
-                printf("value:%s\n", value);
-                printf("test:%s\n", test);
-                k++;
-            }
-            if (strcmp(value, test) == 0){
-                printf("here4\n");
-                strcpy(match, alias[index][1]);
-                printf("here5\n");
-                alias[j][1] = strdup(match);
-
-            
-            }
-        }
-        }
-   // }
-}
-
 
 
 
