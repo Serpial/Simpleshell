@@ -15,7 +15,6 @@
 void executeExternal(char **phrase){
     pid_t pid;
     pid = fork();
-
     if (pid == -1){ // fork is less than zero and so an error has occured
         perror("Error has occurred, fork has failed");
     }
@@ -38,7 +37,7 @@ void executeExternal(char **phrase){
 /* Stage 2: Execute external commands. */
 
 void executeInstruction (char **phrase, char **history, int rear, char originalPath[500], char *alias[MAX_ALIAS_SIZE][2], int counter) {
-    
+
     // Each instruction will be executed if the input is not null.
     if (phrase[0]!=NULL){
         if (strcmp(phrase[0], "getpath")==0) { // getPath.
@@ -68,20 +67,25 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
             //checks if command is an alias then runs execute instruction again 
             for (int j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
                 counter++;
+
                 if (strcmp(phrase[0], alias[j][0]) == 0){
                     strcpy(temp, alias[j][1]);   
                      p[strlen(p)-1]=0;
                      strcpy(phrase[0], temp);
                      executeInstruction(phrase, history, rear, originalPath, alias,counter);
+
                     return;
                }
+
                 }
 
             }
-            executeExternal(phrase);
+           executeExternal(phrase);
+          
         }
+    }
  
-    }   
+    //}   
   
     
 }

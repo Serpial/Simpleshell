@@ -27,7 +27,7 @@ int main() {
     char **phrase; // Array of components of the instruction
     char originalPath[500]; // User's Input Path
     char *history[MAX_HISTORY_SIZE]; // Instructions the user has entered
-    char *alias[MAX_ALIAS_SIZE][2] = {{NULL}};
+    char *alias[MAX_ALIAS_SIZE][2] = {{""}};
     int rear = 0; // A constant used in the history function.
     int counter = 0;
 
@@ -79,6 +79,7 @@ int main() {
 
         // Calls the executeInstruction function for each instruction to be executed.
         executeInstruction(phrase, history, rear, originalPath, alias,counter);
+
         memset(instruction,0,strlen(instruction));
     }
 }

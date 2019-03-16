@@ -80,7 +80,7 @@ nullEntries = howManyNullSpaces(alias);
 
  //checks if alias is full if not adds
  if(nullEntries == 0){
-    printf("no more space for alias");
+    printf("no more space for alias. please unalias or overwrite a previous alias\n");
     //return;
     }
  else if (nullEntries != 0 && found == 0){
@@ -144,6 +144,7 @@ invokeAlias: Is used to recognise when an alias is called and then change
 the current instruction to that aliases command.
 */
 void invokeAlias(char* instruction, char *alias[MAX_ALIAS_SIZE][2]){
+    //printf("alias called:");
     int i;
     int nullEntries;
  char temp[512];
@@ -165,9 +166,14 @@ char*q = temp2;
                          
 
                     }
+
                 strcpy(instruction, alias[i][1]);
+
+
                 }
+
             }
+
         }
     }
 
