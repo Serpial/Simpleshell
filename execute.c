@@ -60,19 +60,32 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
             removeAlias(phrase, alias);
         } else { 
                 int nullEntries=0;
-         
-            nullEntries = howManyNullSpaces(alias);
-            
+                nullEntries = howManyNullSpaces(alias);
+                char temp[512];
+                char *p = temp;
+                char last[1];
+            printf("here\n");
             //checks if command is an alias then runs execute instruction again 
             for (int j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
                 if (strcmp(phrase[0], alias[j][0]) == 0){
-                    //strcpy(phrase[0],alias[j][1]);
-                     phrase[0] = strdup(alias [j][1]);
+                    strcpy(temp, alias[j][1]);
+                     
+                    //do if statemet so if last part of temp is ' '
+                    if(temp[strlen(temp)-1]== ' '){
+                    //this works for aguments but causes seg fault when alias is shit
+                     p[strlen(p)-1]=0;
+                     strcpy(phrase[0], temp);
                     executeInstruction(phrase, history, rear, originalPath, alias);
                    return;
+               }
+               else{
+                strcpy(phrase[0],temp);
+                executeInstruction(phrase, history, rear, originalPath, alias);
+                   return;
+               }
                 }
             }
-        
+        printf("here2\n");
             //if the command is not an 
             executeExternal(phrase);
     }   
