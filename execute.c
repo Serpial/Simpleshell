@@ -37,7 +37,7 @@ void executeExternal(char **phrase){
 
 /* Stage 2: Execute external commands. */
 
-void executeInstruction (char **phrase, char **history, int rear, char originalPath[500], char *alias[MAX_ALIAS_SIZE][2]) {
+void executeInstruction (char **phrase, char **history, int rear, char originalPath[500], char *alias[MAX_ALIAS_SIZE][2], int counter) {
     
     // Each instruction will be executed if the input is not null.
     if (phrase[0]!=NULL){
@@ -46,7 +46,7 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
         } else if (strcmp(phrase[0], "setpath") == 0) { // setPath.
             setPath(phrase);
         } else if (strcmp(phrase[0], "!")==0) {  // ! (used in history).
-            recallHistory(phrase, history, rear, originalPath, alias);      
+            recallHistory(phrase, history, rear, originalPath, alias, counter);      
         } else if (strcmp(phrase[0], "history")==0) { // history.
             printHistory(history, rear);
         } else if ((strcmp(phrase[0], "cd")==0)){ // cd (change directory).
@@ -59,24 +59,25 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
             addAlias(phrase, alias);
         } else if(strcmp(phrase[0], "unalias")==0){
             removeAlias(phrase, alias);
-        } else { /*
+        } else { 
+            while(counter<10){
                 int nullEntries=0;
                 nullEntries = howManyNullSpaces(alias);
                 char temp[512];
                 char *p = temp;
             //checks if command is an alias then runs execute instruction again 
             for (int j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
+                counter++;
                 if (strcmp(phrase[0], alias[j][0]) == 0){
-                    strcpy(temp, alias[j][1]);
-                    //this works for aguments but causes seg fault when alias is shit
+                    strcpy(temp, alias[j][1]);   
                      p[strlen(p)-1]=0;
                      strcpy(phrase[0], temp);
-                     //echo hi going in pharse 0, not phrase 0 , 1
-                     executeInstruction(phrase, history, rear, originalPath, alias);
-
+                     executeInstruction(phrase, history, rear, originalPath, alias,counter);
                     return;
                }
-                }*/
+                }
+
+            }
             executeExternal(phrase);
         }
  

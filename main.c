@@ -29,7 +29,7 @@ int main() {
     char *history[MAX_HISTORY_SIZE]; // Instructions the user has entered
     char *alias[MAX_ALIAS_SIZE][2] = {{NULL}};
     int rear = 0; // A constant used in the history function.
-
+    int counter = 0;
 
     /* Stage 1: Prompt user, and Read and parse user input, Exit shell and Initialise the
        working directory. */
@@ -78,7 +78,7 @@ int main() {
         }
 
         // Calls the executeInstruction function for each instruction to be executed.
-        executeInstruction(phrase, history, rear, originalPath, alias);
+        executeInstruction(phrase, history, rear, originalPath, alias,counter);
         memset(instruction,0,strlen(instruction));
     }
 }

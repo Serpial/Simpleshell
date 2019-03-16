@@ -61,7 +61,7 @@ void printHistory(char **history, int rear){
 With it a user can specify where in memory the requested memory is
 and then have it be used as normal through the executer file.
  */
-void recallHistory (char **phrase, char **history, int rear, char *originalPath, char *(*alias)[2]) {
+void recallHistory (char **phrase, char **history, int rear, char *originalPath, char *(*alias)[2], int counter) {
     int lineNum=0;
 
     if (phrase[1]!=NULL) {
@@ -70,7 +70,7 @@ void recallHistory (char **phrase, char **history, int rear, char *originalPath,
             lineNum = (rear==0?MAX_HISTORY_SIZE-1:rear-1);
             printf("%s\n", history[lineNum]);
             phrase = parseInput(history[lineNum]);
-            executeInstruction(phrase, history, rear, originalPath, alias);
+            executeInstruction(phrase, history, rear, originalPath, alias, counter);
             return;
 
 
@@ -83,7 +83,7 @@ void recallHistory (char **phrase, char **history, int rear, char *originalPath,
 
                     printf("%s\n", history[lineNum]);
                     phrase = parseInput(history[lineNum]);
-                    executeInstruction(phrase, history, rear, originalPath, alias);
+                    executeInstruction(phrase, history, rear, originalPath, alias, counter);
                     return;
                 } else {  // This is for getting that item from history
                     if (howMany(history)==20) {
@@ -94,7 +94,7 @@ void recallHistory (char **phrase, char **history, int rear, char *originalPath,
 
                     printf("%s\n", history[lineNum]);
                     phrase = parseInput(history[lineNum]);
-                    executeInstruction(phrase, history, rear, originalPath, alias);
+                    executeInstruction(phrase, history, rear, originalPath, alias, counter);
                     return;
                 }
             } else {
