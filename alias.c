@@ -154,7 +154,7 @@ char*q = temp2;
     for (i = 0; i<MAX_ALIAS_SIZE-nullEntries; i++){
         if (alias[i][0] != NULL){
             if (strcmp(instruction, alias[i][0]) == 0){
-                    for(int j=0; j<MAX_ALIAS_SIZE-nullEntries; j++){
+                    for(int j=0; j<MAX_ALIAS_SIZE-nullEntries; j++){ //this for is stage 9
                         strcpy(temp, alias[i][1]);
                         p[strlen(p)-1]=0;
                          if(strcmp(alias[j][0], temp)==0){
@@ -167,7 +167,6 @@ char*q = temp2;
                     }
                 strcpy(instruction, alias[i][1]);
                 }
-                //strcpy(instruction, alias[index][1]);
             }
         }
     }
