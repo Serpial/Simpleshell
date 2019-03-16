@@ -21,7 +21,6 @@ char* buildPrefix(char* directory);
 
 /* Main Function */
 int main() {
-
     char currentDir[PATHSIZE]; // Current Directory the user is in
     char instruction[MAX_INSTR]; // Pre-parsed instruction
     char **phrase; // Array of components of the instruction

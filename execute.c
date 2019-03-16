@@ -59,27 +59,30 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
         } else if(strcmp(phrase[0], "unalias")==0){
             removeAlias(phrase, alias);
         } else { 
-                int nullEntries=0;
+            int nullEntries=0;
          
             nullEntries = howManyNullSpaces(alias);
+
+            char **tokAlias;
+            char *phraseToken;
             
             //checks if command is an alias then runs execute instruction again 
             for (int j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
                 if (strcmp(phrase[0], alias[j][0]) == 0){
-                    //strcpy(phrase[0],alias[j][1]);
-                     phrase[0] = strdup(alias [j][1]);
+                    // Tokenise alias
+                    tokAlias = parseInput(alias[j][1]);
+                    // Now place it back in phrase at the front
+                    phrase[0] = strdup(tokAlias[0]);
+
+                    // phrase[0] = strdup(alias [j][1]);
                     executeInstruction(phrase, history, rear, originalPath, alias);
-                   return;
+                    return;
                 }
             }
         
             //if the command is not an 
             executeExternal(phrase);
-    }   
+        }   
     } 
     
 }
-
-
-            
- 

@@ -33,62 +33,62 @@ void printAlias(char *alias[MAX_ALIAS_SIZE][2]){
 }
 
 /*
-addAlias: allows the user to create a new alias for a command.
+  addAlias: allows the user to create a new alias for a command.
 */
 
 void addAlias(char**phrase, char *alias[MAX_ALIAS_SIZE][2]){
-if (phrase[1] == NULL){
-    printf("Not enough arguments\n");
-    return;
-}
-else if(phrase[2] == NULL){
-printf("Not enough arguments\n");
-    return;
-}
-
-
-//char name[] = " ";
-char command [512] = "";
-int index = 2;
-int j;
-int found = 0;
-//find how mnany arguments there are 
-while(phrase[index] != NULL){
- index++;
-}
-
-//makes command for alias
-for (j =2; j<index; j++){
-    strcat(command, phrase[j]);
-    strcat(command, " ");
-}
-
-
-
-//counts null charatcers
-int nullEntries=0;
-nullEntries = howManyNullSpaces(alias);
-
- //checks list of previous alias 
- for (j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
-    if (strcmp(phrase[1], alias[j][0]) == 0){
-        printf("overwriting previous alias\n");
-        alias[j][1] = strdup(command);
-        found = 1;
+    if (phrase[1] == NULL){
+        printf("Not enough arguments\n");
+        return;
     }
- }
-
- //checks if alias is full if not adds
- if(nullEntries == 0){
-    printf("no more space for alias");
-    //return;
+    else if(phrase[2] == NULL){
+        printf("Not enough arguments\n");
+        return;
     }
- else if (nullEntries != 0 && found == 0){
-    alias[MAX_ALIAS_SIZE-nullEntries][0] =strdup(phrase[1]);
-    alias[MAX_ALIAS_SIZE-nullEntries][1] =strdup(command);
+
+
+    //char name[] = " ";
+    char command [512] = "";
+    int index = 2;
+    int j;
+    int found = 0;
+    //find how mnany arguments there are 
+    while(phrase[index] != NULL){
+        index++;
+    }
+
+    //makes command for alias
+    for (j =2; j<index; j++){
+        strcat(command, phrase[j]);
+        strcat(command, " ");
+    }
+
+
+
+    //counts null charatcers
+    int nullEntries=0;
+    nullEntries = howManyNullSpaces(alias);
+
+    //checks list of previous alias 
+    for (j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
+        if (strcmp(phrase[1], alias[j][0]) == 0){
+            printf("overwriting previous alias\n");
+            alias[j][1] = strdup(command);
+            found = 1;
+        }
+    }
+
+    //checks if alias is full if not adds
+    if(nullEntries == 0){
+        printf("no more space for alias");
+        //return;
+    }
+    else if (nullEntries != 0 && found == 0){
+        alias[MAX_ALIAS_SIZE-nullEntries][0] =strdup(phrase[1]);
+        alias[MAX_ALIAS_SIZE-nullEntries][1] =strdup(command);
   
 
- }
+    }
 
 
 }
