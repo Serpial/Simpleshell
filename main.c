@@ -66,6 +66,7 @@ int main() {
         if (len && (instruction[len-1] == '\n')) {
             instruction[len-1] = '\0';
         }
+     
 
         invokeAlias(instruction, alias);
         // Run the given command
