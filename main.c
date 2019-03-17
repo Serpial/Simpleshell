@@ -124,10 +124,10 @@ char* buildPrefix(char* directory) {
 void changeDirectory(char **arguments) {
 
     char *firstArgument = arguments[1];
-
+    
     // This will check that there is not an invalid number of arguments, printing an error message if there is.
-    if (arguments[2] != NULL) {
-        printf("Error: Too many arguments\n");
+    if (arguments[1]!=NULL &&  arguments[2] != NULL) {
+        printf("Error: CD: Too many arguments\n");
         return;
     }
 
