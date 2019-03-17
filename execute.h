@@ -4,5 +4,5 @@
 #define PATHSIZE 200  // Maximum number of chars in currentDirectory
 
 void executeExternal(char **phrase);
-void executeInstruction (char **phrase, char **history, int rear, char originalPath[500], char *(*alias)[2]);
+void executeInstruction (char **phrase, char **history, int rear, char originalPath[500], char *(*alias)[2], int counter);
 #endif

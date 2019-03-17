@@ -23,9 +23,9 @@ int main() {
     char **phrase; // Array of components of the instruction
     char originalPath[500]; // User's Input Path
     char *history[MAX_HISTORY_SIZE]; // Instructions the user has entered
-    char *alias[MAX_ALIAS_SIZE][2] = {{NULL}};
+    char *alias[MAX_ALIAS_SIZE][2] = {{""}};
     int rear = 0; // A constant used in the history function.
-
+    int counter = 0;
 
     /* Stage 1: Prompt user, and Read and parse user input, Exit shell and Initialise the
        working directory. */
@@ -62,18 +62,20 @@ int main() {
         if (len && (instruction[len-1] == '\n')) {
             instruction[len-1] = '\0';
         }
+     
 
         invokeAlias(instruction, alias);
         // Run the given command
         phrase = parseInput(instruction);
-        
+
         // Put instruction into history and get new rear
         if (phrase[0]!=NULL && strcmp(phrase[0], "!")!=0) {
             rear = addToHistory(history, rear, phrase);
         }
 
         // Calls the executeInstruction function for each instruction to be executed.
-        executeInstruction(phrase, history, rear, originalPath, alias);
+        executeInstruction(phrase, history, rear, originalPath, alias,counter);
+
         memset(instruction,0,strlen(instruction));
     }
 }
@@ -118,10 +120,10 @@ char* buildPrefix(char* directory) {
 void changeDirectory(char **arguments) {
 
     char *firstArgument = arguments[1];
-
+    
     // This will check that there is not an invalid number of arguments, printing an error message if there is.
-    if (arguments[2] != NULL) {
-        printf("Error: Too many arguments\n");
+    if (arguments[1]!=NULL &&  arguments[2] != NULL) {
+        printf("Error: CD: Too many arguments\n");
         return;
     }
 

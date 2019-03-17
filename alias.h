@@ -1,7 +1,7 @@
 #ifndef ALIAS_H
 #define ALIAS_H
 
-#define MAX_ALIAS_SIZE 20
+#define MAX_ALIAS_SIZE 10
 
 void printAlias(char *alias[MAX_ALIAS_SIZE][2]);
 void addAlias(char**phrase, char *alias[MAX_ALIAS_SIZE][2]);

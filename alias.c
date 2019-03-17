@@ -21,75 +21,79 @@ void printAlias(char *alias[MAX_ALIAS_SIZE][2]){
             nullEntries++; 
         }
     }
-
-    if (nullEntries == MAX_ALIAS_SIZE){
+    
+    if (nullEntries == MAX_ALIAS_SIZE ||
+        (strcmp(alias[0][0], "")==0 && alias[1][0]==NULL)){
         printf("You dont have any aliases\n");
     }
     else{
         for(index =0; index< (MAX_ALIAS_SIZE - nullEntries); index++){
-            printf("%i. %s %s \n", counter++, alias[index][0], alias[index][1]);
+            if (strcmp(alias[index][0], "")!=0) {
+                printf("%i. %s %s \n", counter++, alias[index][0], alias[index][1]);
+            }
         }
     }
 }
 
 /*
-addAlias: allows the user to create a new alias for a command.
+  addAlias: allows the user to create a new alias for a command.
 */
 
 void addAlias(char**phrase, char *alias[MAX_ALIAS_SIZE][2]){
-if (phrase[1] == NULL){
-    printf("Not enough arguments\n");
-    return;
-}
-else if(phrase[2] == NULL){
-printf("Not enough arguments\n");
-    return;
-}
-
-
-//char name[] = " ";
-char command [512] = "";
-int index = 2;
-int j;
-int found = 0;
-//find how mnany arguments there are 
-while(phrase[index] != NULL){
- index++;
-}
-
-//makes command for alias
-for (j =2; j<index; j++){
-    strcat(command, phrase[j]);
-    strcat(command, "");
-}
-
-//counts null charatcers
-int nullEntries=0;
-nullEntries = howManyNullSpaces(alias);
-
- //checks list of previous alias 
- for (j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
-    if (strcmp(phrase[1], alias[j][0]) == 0){
-        printf("overwriting previous alias\n");
-        alias[j][1] = strdup(command);
-   
-        found = 1;
+    if (phrase[1] == NULL){
+        printf("Not enough arguments\n");
+        return;
     }
- }
-
- //checks if alias is full if not adds
- if(nullEntries == 0){
-    printf("no more space for alias");
-    //return;
+    else if(phrase[2] == NULL){
+        printf("Not enough arguments\n");
+        return;
     }
- else if (nullEntries != 0 && found == 0){
-    alias[MAX_ALIAS_SIZE-nullEntries][0] =strdup(phrase[1]);
-    alias[MAX_ALIAS_SIZE-nullEntries][1] =strdup(command);
+
+
+    //char name[] = " ";
+    char command [512] = "";
+    int index = 2;
+    int j;
+    int found = 0;
+    //find how mnany arguments there are 
+    while(phrase[index] != NULL){
+        index++;
+    }
+
+    //makes command for alias
+    for (j =2; j<index; j++){
+        strcat(command, phrase[j]);
+        strcat(command, " ");
+    }
+
+
+
+    //counts null charatcers
+    int nullEntries=0;
+    nullEntries = howManyNullSpaces(alias);
+
+    //checks list of previous alias 
+    for (j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
+        if (strcmp(phrase[1], alias[j][0]) == 0){
+            printf("overwriting previous alias\n");
+            alias[j][1] = strdup(command);
+            found = 1;
+        }
+    }
+
+    //checks if alias is full if not adds
+    if(nullEntries == 0){
+        printf("no more space for alias. please unalias or overwrite a previous alias\n");
+        //return;
+    }
+    else if (nullEntries != 0 && found == 0){
+        alias[MAX_ALIAS_SIZE-nullEntries][0] =strdup(phrase[1]);
+        alias[MAX_ALIAS_SIZE-nullEntries][1] =strdup(command);
   
 
- }
+    }
 
-substituteAlias(alias);  
+
 }
 
 /*
@@ -99,7 +103,7 @@ void removeAlias(char **phrase, char *alias[MAX_ALIAS_SIZE][2]){
     int found = 0;
     int index;
     int j;
-    char name[512] = " ";
+    char name[512] = "";
 
     if (phrase[1] == NULL){
         printf("Error: too few arguments\n");
@@ -143,11 +147,26 @@ invokeAlias: Is used to recognise when an alias is called and then change
 the current instruction to that aliases command.
 */
 void invokeAlias(char* instruction, char *alias[MAX_ALIAS_SIZE][2]){
-    int index;
-    for (index = 0; index<MAX_ALIAS_SIZE; index++){
-        if (alias[index][0] != NULL){
-            if (strcmp(instruction, alias[index][0]) == 0){
-                strcpy(instruction, alias[index][1]);
+    //printf("alias called:");
+    int i, nullEntries;
+    char temp[512], temp2[512];
+    char *p = temp, *q = temp2;
+    
+    nullEntries = howManyNullSpaces(alias);
+    
+    for (i = 0; i<MAX_ALIAS_SIZE-nullEntries; i++){
+        if (alias[i][0] != NULL){
+            if (strcmp(instruction, alias[i][0]) == 0){
+                for(int j=0; j<MAX_ALIAS_SIZE-nullEntries; j++){ //this for is stage 9
+                    strcpy(temp, alias[i][1]);
+                    p[strlen(p)-1]=0;
+                    if(strcmp(alias[j][0], temp)==0){
+
+                        strcpy(instruction, alias[j][1]);
+                        return;
+                    }
+                }
+                strcpy(instruction, alias[i][1]);
             }
         }
     }
@@ -162,7 +181,8 @@ void readAliases (char *alias[MAX_ALIAS_SIZE][2]) {
     FILE *fp;
     char fileLocation[MAX_INSTR]="";
     char joinedAlias[MAX_INSTR]="", temp[MAX_INSTR];
-    int numAlias=0, len, letterIndex, pastBar = 0;
+    int numAlias=0, len, letterIndex, pastBar = 0, counter;
+    char *tempAlias[MAX_ALIAS_SIZE][2]={{""}};
     
     strcpy(fileLocation, getenv("HOME"));
     strcat(fileLocation, "/.aliases");
@@ -187,11 +207,22 @@ void readAliases (char *alias[MAX_ALIAS_SIZE][2]) {
                     break;
                 }
             }
-            addAlias(parseInput(joinedAlias), alias);
+            if (strcmp(joinedAlias, "alias  ")!=0) {
+                addAlias(parseInput(joinedAlias), tempAlias);
+            }
         } else {
             printf("Error: Unable to add alias:%s\n", joinedAlias);
         }
     }
+    counter=0;
+    for (int i=0; tempAlias[i][0]!=NULL; i++) {
+        if (tempAlias[i][0]!=NULL && tempAlias[i][1]!=NULL) {
+            alias[counter][0] = tempAlias[i][0];
+            alias[counter][1] = tempAlias[i][1];
+            counter++;
+        }
+    }
+    if (counter==0) {alias[0][1] = "";}
     fclose(fp);
 }
 
@@ -219,37 +250,14 @@ void writeAliases(char *alias[MAX_ALIAS_SIZE][2]) {
     }
 }
 
-void substituteAlias(char *alias[MAX_ALIAS_SIZE][2]){
-int j = 0;
-int index =0;
-int k=0;
-char value[512] = "";
-char match[512] = "";
-char test[512] = "";
-int nullEntries=0;
-nullEntries = howManyNullSpaces(alias);
-for (j=0; j<MAX_ALIAS_SIZE-nullEntries; j++){
-        strcpy(value, alias[j][1]);
-         for (index=1; index< MAX_ALIAS_SIZE-nullEntries; index++){
-                strcpy(test, alias[index][0]);
-            if (strcmp(value, test) == 0){
-                strcpy(match, alias[index][1]);
-                alias[j][1] = strdup(match);
-
-            
-            }
-        }
-    }
-}
-
 //utlitly fucntion for alaias 
 int howManyNullSpaces(char *alias[MAX_ALIAS_SIZE][2]){
-int k; 
-int nullEntries=0;
- for (k=0; k<MAX_ALIAS_SIZE; k++){
-    if (alias[k][0] == NULL){
-        nullEntries++; 
+    int k; 
+    int nullEntries=0;
+    for (k=0; k<MAX_ALIAS_SIZE; k++){
+        if (alias[k][0] == NULL){
+            nullEntries++; 
+        }
     }
- }
- return nullEntries;   
+    return nullEntries;   
 }
