@@ -95,17 +95,13 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
 
 // Allows the user to SET the path environment variable.
 void setPath(char **phrase) {
-    char tempPath[PATHSIZE];
-
+    
     if (phrase[2]!=NULL){
         printf("Too many arguments\n");
     } else if (phrase[1]==NULL){
         printf("Too few arguments\n");
     } else {
-        strcpy(tempPath, phrase[1]);
-        strcat(tempPath, ":");
-        strcat(tempPath, getenv("PATH"));
-        setenv("PATH", tempPath, 1);
+        setenv("PATH", phrase[1], 1);
     }
 }
 
