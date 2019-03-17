@@ -21,13 +21,16 @@ void printAlias(char *alias[MAX_ALIAS_SIZE][2]){
             nullEntries++; 
         }
     }
-
-    if (nullEntries == MAX_ALIAS_SIZE){
+    
+    if (nullEntries == MAX_ALIAS_SIZE ||
+        (strcmp(alias[0][0], "")==0 && alias[1][0]==NULL)){
         printf("You dont have any aliases\n");
     }
     else{
         for(index =0; index< (MAX_ALIAS_SIZE - nullEntries); index++){
-            printf("%i. %s %s \n", counter++, alias[index][0], alias[index][1]);
+            if (strcmp(alias[index][0], "")!=0) {
+                printf("%i. %s %s \n", counter++, alias[index][0], alias[index][1]);
+            }
         }
     }
 }
@@ -145,13 +148,12 @@ the current instruction to that aliases command.
 */
 void invokeAlias(char* instruction, char *alias[MAX_ALIAS_SIZE][2]){
     //printf("alias called:");
-    int i;
-    int nullEntries;
-    char temp[512];
-    char temp2[512];
-    char *p = temp;
-    char*q = temp2;
+    int i, nullEntries;
+    char temp[512], temp2[512];
+    char *p = temp, *q = temp2;
+    
     nullEntries = howManyNullSpaces(alias);
+    
     for (i = 0; i<MAX_ALIAS_SIZE-nullEntries; i++){
         if (alias[i][0] != NULL){
             if (strcmp(instruction, alias[i][0]) == 0){
@@ -205,7 +207,9 @@ void readAliases (char *alias[MAX_ALIAS_SIZE][2]) {
                     break;
                 }
             }
-            addAlias(parseInput(joinedAlias), tempAlias);
+            if (strcmp(joinedAlias, "alias  ")!=0) {
+                addAlias(parseInput(joinedAlias), tempAlias);
+            }
         } else {
             printf("Error: Unable to add alias:%s\n", joinedAlias);
         }

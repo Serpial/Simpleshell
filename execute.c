@@ -24,7 +24,6 @@ void executeExternal(char **phrase){
         if (execvp(phrase[0], phrase)== -1){
             printf(" %s: we dont recognise this command\n", phrase[0]);
             _exit(1);
-            // perror("We did not recognise this command");
         }
     }
     else { // in the parent process
@@ -64,30 +63,26 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
                 nullEntries = howManyNullSpaces(alias);
                 char temp[512];
                 char *p = temp;
-            //checks if command is an alias then runs execute instruction again 
-            for (int j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
-                counter++;
+                //checks if command is an alias then runs execute instruction again 
+                for (int j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
+                    counter++;
 
-                if (strcmp(phrase[0], alias[j][0]) == 0){
-                    strcpy(temp, alias[j][1]);   
-                     p[strlen(p)-1]=0;
-                     strcpy(phrase[0], temp);
-                     executeInstruction(phrase, history, rear, originalPath, alias,counter);
+                    if (strcmp(phrase[0], alias[j][0]) == 0){
+                        strcpy(temp, alias[j][1]);   
+                        p[strlen(p)-1]=0;
+                        strcpy(phrase[0], temp);
+                        executeInstruction(phrase, history, rear, originalPath, alias,counter);
 
-                    return;
-               }
+                        return;
+                    }
 
                 }
 
             }
-           executeExternal(phrase);
+            executeExternal(phrase);
           
         }
     }
- 
-    //}   
-  
-    
 }
 
 
