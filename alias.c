@@ -8,9 +8,8 @@
 #include "main.h"
 
 
-/*
-printAlias:prints all the stored aliases to screen.
-*/
+/* Prints all the stored aliases to screen.
+ */
 void printAlias(char *alias[MAX_ALIAS_SIZE][2]){
     int index;
     int nullEntries=0;
@@ -21,7 +20,8 @@ void printAlias(char *alias[MAX_ALIAS_SIZE][2]){
             nullEntries++; 
         }
     }
-    
+
+    // Print aliases while the first entry isn't empty
     if (nullEntries == MAX_ALIAS_SIZE ||
         (strcmp(alias[0][0], "")==0 && alias[1][0]==NULL)){
         printf("You dont have any aliases\n");
@@ -35,10 +35,8 @@ void printAlias(char *alias[MAX_ALIAS_SIZE][2]){
     }
 }
 
-/*
-  addAlias: allows the user to create a new alias for a command.
-*/
-
+/* Allows the user to create a new alias for a command.
+ */
 void addAlias(char**phrase, char *alias[MAX_ALIAS_SIZE][2]){
     if (phrase[1] == NULL){
         printf("Error: alias: Not enough arguments\n");
@@ -96,9 +94,8 @@ void addAlias(char**phrase, char *alias[MAX_ALIAS_SIZE][2]){
 
 }
 
-/*
-removeAlias: Removes the requested alias.
-*/
+/* Removes the requested alias given that it exists
+ */
 void removeAlias(char **phrase, char *alias[MAX_ALIAS_SIZE][2]){
     int found = 0;
     int index;
@@ -142,10 +139,9 @@ void removeAlias(char **phrase, char *alias[MAX_ALIAS_SIZE][2]){
     return;
 }
 
-/*
-invokeAlias: Is used to recognise when an alias is called and then change
-the current instruction to that aliases command.
-*/
+/* Is used to recognise when an alias is called and then change
+ * the current instruction to that aliases command.
+ */
 void invokeAlias(char* instruction, char *alias[MAX_ALIAS_SIZE][2]){
     //printf("alias called:");
     int i, nullEntries;
@@ -172,22 +168,22 @@ void invokeAlias(char* instruction, char *alias[MAX_ALIAS_SIZE][2]){
     }
 }
 
-/*
-readAliases: Similar to History.c, readAliases reads in a file at a speciified
-location and procedes to fill alias[][] with the text inside.
-*/
-
+/* Similar to History.c, readAliases reads in a file at a speciified
+ * location and procedes to fill alias[][] with the text inside.
+ */
 void readAliases (char *alias[MAX_ALIAS_SIZE][2]) {
     FILE *fp;
     char fileLocation[MAX_INSTR]="";
     char joinedAlias[MAX_INSTR]="", temp[MAX_INSTR];
     int numAlias=0, len, letterIndex, pastBar = 0, counter;
     char *tempAlias[MAX_ALIAS_SIZE][2]={{""}};
-    
+
+    // Read the aliases from the file in the home directory if exists
     strcpy(fileLocation, getenv("HOME"));
     strcat(fileLocation, "/.aliases");
     fp = fopen(fileLocation, "a+");
-    
+
+    // Read while line is not null
     while(fgets(joinedAlias, sizeof(joinedAlias), fp)!=NULL && numAlias<MAX_ALIAS_SIZE) {
         len = strlen(joinedAlias);
         letterIndex=0;
@@ -226,10 +222,8 @@ void readAliases (char *alias[MAX_ALIAS_SIZE][2]) {
     fclose(fp);
 }
 
-/*
-writeAliases: Is used to save the contents of alias[][] to an external file.
-*/
-
+/* Is used to save the contents of alias[][] to an external file.
+ */
 void writeAliases(char *alias[MAX_ALIAS_SIZE][2]) {
     FILE *fp;
     char fileLocation[MAX_INSTR]="";
@@ -250,7 +244,8 @@ void writeAliases(char *alias[MAX_ALIAS_SIZE][2]) {
     }
 }
 
-//utlitly fucntion for alaias 
+/* uUtlitly fucntion for alaias 
+ */
 int howManyNullSpaces(char *alias[MAX_ALIAS_SIZE][2]){
     int k; 
     int nullEntries=0;

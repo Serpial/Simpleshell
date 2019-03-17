@@ -44,7 +44,8 @@ int addToHistory(char **history, int rear, char** phrase) {
     return rear;
 }
 
-/*Prints 20 elements of history to the user.*/
+/* Prints 20 elements of history to the user.
+ */
 void printHistory(char **history, int rear, char **phrase){
     if (phrase[1]!=NULL) {
         printf("Error: history: too many arguments\n");
@@ -62,9 +63,9 @@ void printHistory(char **history, int rear, char **phrase){
     while ( i != rear);
 }
 
-/*recallHistory: Is what is used to “recall” a command from memory.
-With it a user can specify where in memory the requested memory is
-and then have it be used as normal through the executer file.
+/* Is what is used to “recall” a command from memory.
+ * With it a user can specify where in memory the requested memory is
+ * and then have it be used as normal through the executer file.
  */
 void recallHistory (char **phrase, char **history, int rear, char *originalPath, char *(*alias)[2], int counter) {
     int lineNum=0;
@@ -111,6 +112,10 @@ void recallHistory (char **phrase, char **history, int rear, char *originalPath,
     }
 }
 
+/* Small function that follows the steps necessary whenever an item
+ * is recalled. It only recals if the item on the list is not nothing
+ * otherwise it gives an error
+ */
 void executeRecall(char **phrase, char **history, int rear, char *originalPath, char *(*alias)[2], int counter, int lineNum) {
     if (strcmp(history[lineNum], "")!=0) {
         printf("%s\n", history[lineNum]);
@@ -135,10 +140,9 @@ int howMany(char **history) {
 
 /* Stage 6: Persistent history. */
 
-/*writeHistory: Writes the current elements in History to a specified file
+/* Writes the current elements in History to a specified file
  * location returning an error message if it does not open
  */
-
 void writeHistory(char **history, int rear) {
     FILE *fp;
     int i;
@@ -162,10 +166,9 @@ void writeHistory(char **history, int rear) {
     } while (i!=rear);
 }
 
-/*readHistory: opens a text file in the same specified location as WriteHistory
+/* Opens a text file in the same specified location as WriteHistory
  * and fills  the running programs history with the text in the file.
  */
-
 void readHistory(char **history, int *rear){
     FILE *fp;
     int numInstr=0;

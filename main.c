@@ -81,8 +81,9 @@ int main() {
 }
 
 
-/* Stage 3: Setting the current directory to Home. */
-
+/* This function builds the string propts the user for input also
+ * allowing the user to see what directory they are currently in
+ */
 char* buildPrefix(char* directory) {
     static char prefix[PATHSIZE];
     char *name, *temp = malloc(PATHSIZE);
@@ -116,7 +117,9 @@ char* buildPrefix(char* directory) {
 
 
 /* Stage 4: Changing Directories. */
-	
+/* Called to chang the directory the user is in to a specified 
+ * location
+ */
 void changeDirectory(char **arguments) {
 
     char *firstArgument = arguments[1];
@@ -151,7 +154,8 @@ void changeDirectory(char **arguments) {
     }
 }
 
-// Separate the users instruction into an array of actionable components.
+/* Separate the users instruction into an array of actionable components.
+ */
 char** parseInput(char* instruction) {
     char specialChar[] = "!|><&;\"";
     int counter=0, wordIdx=0, letterIdx=0;
@@ -204,7 +208,9 @@ char** parseInput(char* instruction) {
 }
 
 
-/* Ran on the way out */
+/* Saves history and alias and returns the PATH variable before
+ * eziting the program
+ */
 void exitProgram(int exitCode, char *originalPath, char **history, int rear, char *(*alias)[2]) {
     // Reset the path to what it was before the session was opened
     setenv("PATH", originalPath, 1);

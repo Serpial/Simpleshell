@@ -16,7 +16,7 @@
 // Function Prototypes
 void setPath(char **phrase);
 void getPath(char **phrase);
-
+int runAlias(char **phrase, char **history, int rear, char originalPath[500], char *(*alias)[2], int counter);
 
 /* Stage 2: Execute external commands. */
 void executeExternal(char **phrase){
@@ -41,7 +41,7 @@ void executeExternal(char **phrase){
 }
 
 /* Execute internal and external instructions based on the first arguement 
-*/
+ */
 void executeInstruction (char **phrase, char **history, int rear, char originalPath[500], char *(*alias)[2], int counter) {
     // Each instruction will be executed if the input is not null.
     if (phrase[0]!=NULL){
@@ -64,31 +64,41 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
         } else if(strcmp(phrase[0], "unalias")==0){
             removeAlias(phrase, alias);
         } else { 
-            while(counter<10){
-                int nullEntries=0;
-                nullEntries = howManyNullSpaces(alias);
-                char temp[512];
-                char *p = temp;
-                //checks if command is an alias then runs execute instruction again 
-                for (int j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
-                    counter++;
-
-                    if (strcmp(phrase[0], alias[j][0]) == 0){
-                        strcpy(temp, alias[j][1]);   
-                        p[strlen(p)-1]=0;
-                        strcpy(phrase[0], temp);
-                        executeInstruction(phrase, history, rear, originalPath, alias,counter);
-
-                        return;
-                    }
-
-                }
-
+            if (!runAlias(phrase, history, rear, originalPath, alias, counter)) {
+                executeExternal(phrase);
             }
-            executeExternal(phrase);
-          
         }
     }
+}
+
+/* Checks the instruction for an alias and reruns execute if it is
+ * The function will return 1 if alias and 0 if not
+ */
+int runAlias(char **phrase, char **history, int rear, char originalPath[500], char *(*alias)[2], int counter) {
+    int nullEntries = 0;
+    char temp[512];
+    char *p;
+    
+    while(counter<10){
+        nullEntries = howManyNullSpaces(alias);
+        p = temp;
+        
+        //checks if command is an alias then runs execute instruction again 
+        for (int j =0; j<(MAX_ALIAS_SIZE-nullEntries); j++){
+            counter++;
+
+            if (strcmp(phrase[0], alias[j][0]) == 0){
+                strcpy(temp, alias[j][1]);   
+                p[strlen(p)-1]=0;
+                strcpy(phrase[0], temp);
+                executeInstruction(phrase, history, rear, originalPath, alias,counter);
+                return 1;
+            }
+
+        }
+
+    }
+    return 0;
 }
 
 /* Stage 3: Setting the Path */
