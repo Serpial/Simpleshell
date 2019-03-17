@@ -52,7 +52,7 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
         } else if (strcmp(phrase[0], "!")==0) {  // ! (used in history).
             recallHistory(phrase, history, rear, originalPath, alias, counter);      
         } else if (strcmp(phrase[0], "history")==0) { // history.
-            printHistory(history, rear);
+            printHistory(history, rear, phrase);
         } else if ((strcmp(phrase[0], "cd")==0)){ // cd (change directory).
             changeDirectory(phrase);
         } else if (strcmp(phrase[0], "exit")==0) {
@@ -97,9 +97,9 @@ void executeInstruction (char **phrase, char **history, int rear, char originalP
 void setPath(char **phrase) {
     
     if (phrase[2]!=NULL){
-        printf("Too many arguments\n");
+        printf("Error: setpath: Too many arguments\n");
     } else if (phrase[1]==NULL){
-        printf("Too few arguments\n");
+        printf("Error: setpath: Too few arguments\n");
     } else {
         setenv("PATH", phrase[1], 1);
     }
@@ -110,7 +110,7 @@ void setPath(char **phrase) {
 // Allow the user to GET the path environment variable.
 void getPath(char **phrase){
     if (phrase[1]!=NULL){
-        printf("Too many arguments\n");
+        printf("Error: getpath: Too many arguments\n");
     } else {
         printf("%s\n", getenv("PATH"));
     }

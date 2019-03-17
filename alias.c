@@ -41,11 +41,11 @@ void printAlias(char *alias[MAX_ALIAS_SIZE][2]){
 
 void addAlias(char**phrase, char *alias[MAX_ALIAS_SIZE][2]){
     if (phrase[1] == NULL){
-        printf("Not enough arguments\n");
+        printf("Error: alias: Not enough arguments\n");
         return;
     }
     else if(phrase[2] == NULL){
-        printf("Not enough arguments\n");
+        printf("Error: alias: Not enough arguments\n");
         return;
     }
 
@@ -106,10 +106,10 @@ void removeAlias(char **phrase, char *alias[MAX_ALIAS_SIZE][2]){
     char name[512] = "";
 
     if (phrase[1] == NULL){
-        printf("Error: too few arguments\n");
+        printf("Error: unalias: too few arguments\n");
         return;
     } else if (phrase[2] != NULL){
-        printf("Error: too many arguments\n");
+        printf("Error: unalias: too many arguments\n");
         return;
     }
 
@@ -240,7 +240,7 @@ void writeAliases(char *alias[MAX_ALIAS_SIZE][2]) {
     fp = fopen(fileLocation, "w");
 
     if (fp == NULL) {
-        printf("Could not open history file\n");
+        printf("Error: Could not open alias file\n");
         return;
     }
     

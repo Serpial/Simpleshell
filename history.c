@@ -10,6 +10,7 @@
 
 // Function prototype
 int howMany(char **history);
+void executeRecall(char **phrase, char **history, int rear, char *originalPath, char *(*alias)[2], int counter, int lineNum);
 
 /*Stage 5: Adding commands to history, invoking commands from history and
   printing the history. */
@@ -44,7 +45,11 @@ int addToHistory(char **history, int rear, char** phrase) {
 }
 
 /*Prints 20 elements of history to the user.*/
-void printHistory(char **history, int rear){
+void printHistory(char **history, int rear, char **phrase){
+    if (phrase[1]!=NULL) {
+        printf("Error: history: too many arguments\n");
+        return;
+    }
     //set i to be a copy of rear to read in from most recent
     int i = rear;
     int historyIndex=1;
@@ -68,9 +73,7 @@ void recallHistory (char **phrase, char **history, int rear, char *originalPath,
         if (strcmp(phrase[1],"!")==0 && phrase[2]==NULL) {
             // This is for getting the last executable instruction when !! is used
             lineNum = (rear==0?MAX_HISTORY_SIZE-1:rear-1);
-            printf("%s\n", history[lineNum]);
-            phrase = parseInput(history[lineNum]);
-            executeInstruction(phrase, history, rear, originalPath, alias, counter);
+            executeRecall(phrase, history, rear, originalPath, alias, counter, lineNum);
             return;
 
 
@@ -80,10 +83,8 @@ void recallHistory (char **phrase, char **history, int rear, char *originalPath,
                 if (lineNum<0) {  // This is for getting the last x instruction
                     lineNum = (rear+lineNum)<0?
                         (MAX_HISTORY_SIZE-1)+(rear+lineNum)+1: lineNum+rear;
-
-                    printf("%s\n", history[lineNum]);
-                    phrase = parseInput(history[lineNum]);
-                    executeInstruction(phrase, history, rear, originalPath, alias, counter);
+                    
+                    executeRecall(phrase, history, rear, originalPath, alias, counter, lineNum);
                     return;
                 } else {  // This is for getting that item from history
                     if (howMany(history)==20) {
@@ -91,26 +92,35 @@ void recallHistory (char **phrase, char **history, int rear, char *originalPath,
                     } else {
                         lineNum--;
                     }
-
-                    printf("%s\n", history[lineNum]);
-                    phrase = parseInput(history[lineNum]);
-                    executeInstruction(phrase, history, rear, originalPath, alias, counter);
+                    
+                    executeRecall(phrase, history, rear, originalPath, alias, counter, lineNum);
                     return;
                 }
             } else {
                 if (lineNum!=0) {
-                    printf("Error: You have entered too large a value\n");
+                    printf("Error: history recall: You have entered too large a value\n");
                 } else {
-                    printf("Error: Cannot Enter 0\n");
+                    printf("Error: history recall: Cannot Enter 0\n");
                 }
             }
         }
     }
     if (phrase[2]!=NULL) {
-        printf("You have entered too many arguments\n");
+        printf("Error: history recall: You have entered too many arguments\n");
         return;
     }
 }
+
+void executeRecall(char **phrase, char **history, int rear, char *originalPath, char *(*alias)[2], int counter, int lineNum) {
+    if (strcmp(history[lineNum], "")!=0) {
+        printf("%s\n", history[lineNum]);
+        phrase = parseInput(history[lineNum]);
+        executeInstruction(phrase, history, rear, originalPath, alias, counter);
+    } else {
+        printf("Error: history recall: Not an item in history\n");
+    }
+}
+
  /*howMany: returns how many entries are in History*/
 int howMany(char **history) {
     int counter=0;
@@ -139,7 +149,7 @@ void writeHistory(char **history, int rear) {
     fp= fopen(fileLocation,"w");
 
     if (fp == NULL){
-        printf("Could not open history file\n");
+        printf("Error: Could not open history file\n");
         return;
     }
 
@@ -163,18 +173,22 @@ void readHistory(char **history, int *rear){
     char fileLocation[MAX_INSTR]="";
     size_t len;
 
+    // Set the file location
     strcpy(fileLocation, getenv("HOME"));
     strcat(fileLocation, "/.hist_list");
-
     fp = fopen(fileLocation,"a+");
 
+    // Get lines from files
     while(fgets(newInstruction, sizeof(newInstruction), fp)!=NULL && numInstr<20) {
-        len = strlen(newInstruction);
-        if (len && (newInstruction[len-1] == '\n')) {
-            newInstruction[len-1] = '\0';
+        if (strcmp(newInstruction, "\n")!=0){ // dont add empty line
+            len = strlen(newInstruction);
+            if (len && (newInstruction[len-1] == '\n')) {
+                newInstruction[len-1] = '\0';
+            }
+            strcpy(history[numInstr++], newInstruction);
         }
-        strcpy(history[numInstr++], newInstruction);
     }
+    // Set rear
     *rear = numInstr==MAX_HISTORY_SIZE?0:numInstr;
     fclose(fp);
 }
