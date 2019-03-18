@@ -1,7 +1,7 @@
 /**************************************************************************
  * Assessment Title: Simple Shell
  *
- * Number of Submitted C Files: 
+ * Number of Submitted C Files: 8
  *
  * Date: 18th March 2019
  *
