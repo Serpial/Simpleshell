@@ -6,21 +6,23 @@
  * Date: 18th March 2019
  *
  * 
- * Author: Maria Elizabeth Hughes 201716768
-*		 Paul Hutchinson
-*		David  McFadyen
+ * Authors: 
+ *      Maria Elizabeth Hughes 201716768
+*		Paul Hutchinson
+*		David  McFadyen 201707791
 *		Mohammed Adil Ali Akbar 201708796
-*
 *
  *
  *
  * Personal Statement: I confirm that this submission is all my own work.
  *
  *          (Signed)_Maria E Hughes
+ *          (Signed)_David McFadyen
  *
  * 
  *
  **************************************************************************/
+
 
 
 
