@@ -179,7 +179,7 @@ void invokeAlias(char* instruction, char *alias[MAX_ALIAS_SIZE][2]){
     for (i = 0; i<MAX_ALIAS_SIZE-nullEntries; i++){
         if (alias[i][0] != NULL){
             if (strcmp(instruction, alias[i][0]) == 0){
-                for(int j=0; j<MAX_ALIAS_SIZE-nullEntries; j++){ //this for is stage 9
+                /*for(int j=0; j<MAX_ALIAS_SIZE-nullEntries; j++){ //this for is stage 9
                     strcpy(temp, alias[i][1]);
                     p[strlen(p)-1]=0;
                     if(strcmp(alias[j][0], temp)==0){
@@ -187,7 +187,7 @@ void invokeAlias(char* instruction, char *alias[MAX_ALIAS_SIZE][2]){
                         strcpy(instruction, alias[j][1]);
                         return;
                     }
-                }
+                }*/
                 strcpy(instruction, alias[i][1]);
             }
         }
