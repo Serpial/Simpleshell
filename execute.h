@@ -11,7 +11,7 @@
  *		Paul Hutchison 201741535
  *		David  McFadyen 201707791
  *		Mohammed Adil Ali Akbar 201708796
- *
+ *      Andrew Gordon Main 21707775
  *
  *
  * Personal Statement: I confirm that this submission is all my own work.
@@ -20,7 +20,7 @@
  *          (Signed)_Paul Hutchison
  *          (Signed)_David McFadyen
  *          (Signed)_Adil A Akbar
- * 
+ *          (Signed)_Andrew G Main
  *
  **************************************************************************/
 
