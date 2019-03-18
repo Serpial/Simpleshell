@@ -1,3 +1,27 @@
+/**************************************************************************
+ * Assessment Title: Simple Shell
+ *
+ * Number of Submitted C Files: 8
+ *
+ * Date: 18th March 2019
+ *
+ * 
+ * Author: Maria Elizabeth Hughes 201716768
+*		 Paul Hutchinson
+*		David  McFadyen
+*		Mohammed Adil Ali Akbar
+*
+ *
+ *
+ * Personal Statement: I confirm that this submission is all my own work.
+ *
+ *          (Signed)_Maria E Hughes
+ *
+ * 
+ *
+ **************************************************************************/
+
+
 #ifndef HISTORY_H
 #define HISTORY_H
 
