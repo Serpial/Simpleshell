@@ -8,7 +8,7 @@
  * 
  * Authors: 
  *      Maria Elizabeth Hughes 201716768
-*		Paul Hutchinson 201741535
+*		Paul Hutchison 201741535
 *		David  McFadyen 201707791
 *		Mohammed Adil Ali Akbar 201708796
 *
